@@ -1,124 +1,154 @@
-# Sistema Web de Contas a Pagar e Receber
+# Controle Financeiro — Contas a Pagar e Receber
 
-Aplicacao full stack para controle financeiro basico, com API REST em Node.js/Express/SQLite e frontend React/Vite.
+Aplicação full stack para marcar e acompanhar **contas a pagar** e **contas a receber**.
+
+## O que existe hoje
+
+### Dashboard
+- Totais do mês atual: a receber/pagar pendente, já recebido/pago, saldo projetado
+- Contadores de contas vencidas, vencendo hoje e nos próximos 7 dias
+- Lista dos próximos vencimentos
+
+### Lançamentos
+- Criar, editar, excluir e visualizar contas (`PAGAR` / `RECEBER`)
+- Campos: descrição, categoria, valor, vencimento, status, observações
+- Status: `PENDENTE`, `CONCLUIDO`, `CANCELADO`
+- Concluir, reabrir e cancelar pela interface
+- Filtros por status, período, descrição; ordenação e paginação
+- **Recorrência só na criação**: frequências semanal, quinzenal, mensal ou anual + quantidade de parcelas (1–120). O sistema gera N lançamentos com vencimentos espaçados; se N > 1, todos ficam com o mesmo `recorrencia_grupo`. Na edição não há recorrência. Quantidade 1 gera um único lançamento (grupo fica vazio).
+
+### Categorias
+- CRUD com tipo `PAGAR`, `RECEBER` ou `AMBOS`
+- Não é possível excluir categoria em uso
+- Categorias padrão na primeira execução (Moradia, Alimentação, Salário, etc.)
+
+### Relatórios
+- Resumo do período
+- Totais por categoria
+- Evolução por mês
+- Gráficos no frontend (Recharts)
+
+### Exportação e backup
+- Exportação CSV dos lançamentos
+- Criar / listar / baixar backup do SQLite em **Configurações**
+- Restauração: manual (parar o servidor, substituir o arquivo do banco e subir de novo)
+
+### Interface
+- Tema claro/escuro (preferência no navegador)
+- Layout responsivo com páginas: Dashboard, Lançamentos, Categorias, Relatórios, Configurações
+
+### Fora do escopo atual
+- Login / multi-usuário
+- Importação CSV/JSON
+- Restauração de backup pela UI
+- Metas, orçamento, cartões de crédito ou múltiplas carteiras
+- Edição/cancelamento em lote de uma série recorrente
+
+---
 
 ## Arquitetura
 
-- Backend: Node.js, Express, SQLite, dotenv, helmet, CORS, rate limit, Zod, tratamento centralizado de erros.
-- Frontend: React com Vite, React Router, Recharts, CSS tradicional responsivo, tema claro/escuro.
-- Banco: SQLite criado automaticamente em `backend/data/financeiro.sqlite`.
-- Deploy: Docker com volume persistente para `/app/data` e `/app/backups`.
-
-## Estrutura
+- **Backend:** Node.js, Express, SQLite (`better-sqlite3`), Zod, dotenv, Helmet, CORS, rate limit
+- **Frontend:** React, Vite, React Router, Recharts, CSS próprio
+- **Banco:** criado automaticamente em `backend/data/financeiro.sqlite`
+- **Valores:** em centavos
+- **Datas de negócio:** `YYYY-MM-DD` (evita mudança de dia por fuso)
 
 ```text
 controle-financeiro/
-├── backend/
-│   ├── src/
-│   │   ├── config/
-│   │   ├── controllers/
-│   │   ├── database/
-│   │   ├── middlewares/
-│   │   ├── repositories/
-│   │   ├── routes/
-│   │   ├── services/
-│   │   ├── utils/
-│   │   ├── validators/
-│   │   ├── app.js
-│   │   └── server.js
-│   ├── tests/
-│   ├── data/
-│   ├── backups/
-│   └── .env.example
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   ├── hooks/
-│   │   ├── pages/
-│   │   ├── services/
-│   │   ├── styles/
-│   │   └── utils/
-├── scripts/
+├── backend/          API REST + SQLite
+├── frontend/         Interface React
+├── scripts/          controle.bat / controle.ps1
 ├── Dockerfile
 ├── docker-compose.yml
 └── README.md
 ```
 
+---
+
 ## Modelo do banco
 
-Tabela `lancamentos`: `id`, `tipo`, `descricao`, `categoria_id`, `categoria`, `valor_centavos`, `data_vencimento`, `data_pagamento`, `status`, `observacoes`, `recorrencia_grupo`, `created_at`, `updated_at`.
+**categorias:** `id`, `nome`, `tipo`, `created_at`, `updated_at`
 
-Tabela `categorias`: `id`, `nome`, `tipo`, `created_at`, `updated_at`.
+**lancamentos:** `id`, `tipo`, `descricao`, `categoria_id`, `categoria`, `valor_centavos`, `data_vencimento`, `data_pagamento`, `status`, `observacoes`, `recorrencia_grupo`, `created_at`, `updated_at`
 
-Valores monetarios sao armazenados em centavos. Datas de negocio usam `YYYY-MM-DD` para evitar mudanca de dia por fuso horario.
+---
 
-## Rotas principais
+## API (prefixo `/api`)
 
-- `GET /api/lancamentos`
-- `GET /api/lancamentos/:id`
-- `POST /api/lancamentos`
-- `PUT /api/lancamentos/:id`
-- `DELETE /api/lancamentos/:id`
-- `PATCH /api/lancamentos/:id/concluir`
-- `PATCH /api/lancamentos/:id/reabrir`
-- `PATCH /api/lancamentos/:id/cancelar`
-- `GET /api/dashboard/resumo`
-- `GET /api/dashboard/proximos-vencimentos`
-- `GET /api/relatorios/resumo`
-- `GET /api/relatorios/por-categoria`
-- `GET /api/relatorios/por-mes`
-- `GET /api/categorias`
-- `POST /api/categorias`
-- `PUT /api/categorias/:id`
-- `DELETE /api/categorias/:id`
-- `GET /api/exportacoes/csv`
-- `POST /api/backups`
-- `GET /api/backups`
-- `GET /api/backups/:arquivo/download`
+| Método | Rota | Função |
+|--------|------|--------|
+| GET | `/health` | Health check |
+| GET/POST | `/lancamentos` | Listar / criar |
+| GET/PUT/DELETE | `/lancamentos/:id` | Detalhe / editar / excluir |
+| PATCH | `/lancamentos/:id/concluir` | Marcar como pago/recebido |
+| PATCH | `/lancamentos/:id/reabrir` | Voltar para pendente |
+| PATCH | `/lancamentos/:id/cancelar` | Cancelar |
+| GET/POST | `/categorias` | Listar / criar |
+| PUT/DELETE | `/categorias/:id` | Editar / excluir |
+| GET | `/dashboard/resumo` | Resumo do mês |
+| GET | `/dashboard/proximos-vencimentos` | Próximos vencimentos |
+| GET | `/relatorios/resumo` | Relatório do período |
+| GET | `/relatorios/por-categoria` | Por categoria |
+| GET | `/relatorios/por-mes` | Por mês |
+| GET | `/exportacoes/csv` | Exportar CSV |
+| GET/POST | `/backups` | Listar / criar backup |
+| GET | `/backups/:arquivo/download` | Baixar backup |
 
-## Execucao local no Windows
+---
 
-Pre-requisitos: Node.js 22 LTS ou superior.
+## Execução local (Windows)
 
-Backend:
+Pré-requisito: **Node.js 22 LTS** ou superior.
+
+### Forma recomendada
+
+```bat
+cd scripts
+controle.bat
+```
+
+- Sobe backend e frontend
+- `Ctrl+C` no terminal do script → **[P]**arar, **[R]**einiciar ou **[C]**ontinuar
+- Atalhos: `controle.bat parar` | `controle.bat reiniciar`
+
+### Manual
 
 ```bash
+# Backend
 cd backend
 npm install
 copy .env.example .env
 npm run dev
-```
 
-Frontend:
-
-```bash
+# Frontend (outro terminal)
 cd frontend
 npm install
 copy .env.example .env
 npm run dev
 ```
 
-URLs:
+### URLs (desenvolvimento)
 
-- Frontend: `http://localhost:5173`
-- Backend: `http://localhost:3001`
+| Serviço | URL |
+|---------|-----|
+| Frontend | http://localhost:5173 |
+| Backend | http://localhost:3001 |
+| Health | http://localhost:3001/api/health |
 
-Script de controle (unico ponto de entrada):
+Porta do backend: `PORT` em `backend/.env` (padrão do exemplo: **3001**).  
+Frontend aponta para a API via `VITE_API_URL` em `frontend/.env`.
 
-- `scripts/controle.bat` — inicia backend + frontend e fica aguardando
-- Com os servicos rodando, `Ctrl+C` pergunta: **[P]**arar, **[R]**einiciar ou **[C]**ontinuar
-- Atalhos: `controle.bat parar` | `controle.bat reiniciar`
-
-## Dados iniciais
+### Seed (opcional)
 
 ```bash
 cd backend
 npm run seed
 ```
 
-O seed e opcional e nao duplica dados.
+Não duplica dados se já houver seed anterior.
 
-## Testes e build
+### Testes e build
 
 ```bash
 cd backend
@@ -129,22 +159,24 @@ npm test
 npm run build
 ```
 
-## Deploy com Docker em VPS Linux
+---
 
-1. Instale Docker e Docker Compose.
-2. Copie o projeto para a VPS.
-3. Ajuste `CORS_ORIGINS` em `docker-compose.yml` para o dominio real.
-4. Execute:
+## Deploy com Docker (VPS)
+
+No Docker a aplicação usa a porta **3000** dentro do container (diferente do dev local em 3001).
+
+1. Instale Docker e Docker Compose
+2. Copie o projeto para a VPS
+3. Ajuste `CORS_ORIGINS` em `docker-compose.yml` para o domínio real
+4. Suba:
 
 ```bash
 docker compose up -d --build
 ```
 
-O banco fica no volume `financeiro_data`, montado em `/app/data`, e nao e perdido em reinicios do container.
+Dados em volume `financeiro_data` (`/app/data`); backups em `/app/backups`.
 
-## Nginx como proxy reverso
-
-Exemplo em `/etc/nginx/sites-available/controle-financeiro`:
+### Nginx (exemplo)
 
 ```nginx
 server {
@@ -161,15 +193,13 @@ server {
 }
 ```
 
-Ative e recarregue:
-
 ```bash
 sudo ln -s /etc/nginx/sites-available/controle-financeiro /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl reload nginx
 ```
 
-## HTTPS com Certbot
+### HTTPS
 
 ```bash
 sudo apt update
@@ -178,17 +208,15 @@ sudo certbot --nginx -d seudominio.com.br
 sudo systemctl status certbot.timer
 ```
 
-O Certbot instala renovacao automatica via timer.
+### Backup e restauração
 
-## Backup e restauracao
-
-Pelo sistema, use Configuracoes > Criar backup. Pela API:
+Pela UI: **Configurações → Criar backup**. Pela API (dev local):
 
 ```bash
 curl -X POST http://localhost:3001/api/backups
 ```
 
-Para restaurar em Docker:
+Restaurar no Docker:
 
 ```bash
 docker compose down
@@ -196,11 +224,9 @@ docker run --rm -v controle-financeiro_financeiro_data:/data -v ./backup:/backup
 docker compose up -d
 ```
 
-## Atualizacao em producao
+### Atualizar produção
 
 ```bash
 git pull
 docker compose up -d --build
 ```
-
-Os dados permanecem no volume persistente.
