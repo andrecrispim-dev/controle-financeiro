@@ -1,0 +1,22 @@
+services:
+  controle-financeiro:
+    build: .
+    container_name: controle-financeiro
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DB_FILE: /app/data/financeiro.sqlite
+      BACKUP_DIR: /app/backups
+      CORS_ORIGINS: https://seudominio.com.br,http://localhost:3000
+      RATE_LIMIT_WINDOW_MS: 900000
+      RATE_LIMIT_MAX: 300
+    volumes:
+      - financeiro_data:/app/data
+      - financeiro_backups:/app/backups
+
+volumes:
+  financeiro_data:
+  financeiro_backups:
