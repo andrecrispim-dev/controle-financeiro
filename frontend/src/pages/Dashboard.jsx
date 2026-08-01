@@ -1,14 +1,18 @@
 import { AlertTriangle, CalendarClock, CheckCircle2, TrendingDown, TrendingUp, Wallet } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { api } from '../services/api.js';
 import { useApi } from '../hooks/useApi.js';
-import { formatDate, formatMoneyFromCentavos } from '../utils/formatters.js';
+import { formatDate, formatMoneyFromCentavos, monthRangeISO, queryString } from '../utils/formatters.js';
 import { Loading } from '../components/Loading.jsx';
 import { PageHeader } from '../components/PageHeader.jsx';
 import { StatusBadge } from '../components/StatusBadge.jsx';
+import { MonthNavigator } from '../components/MonthNavigator.jsx';
 
 export function Dashboard() {
-  const resumo = useApi(() => api.get('/dashboard/resumo'));
-  const proximos = useApi(() => api.get('/dashboard/proximos-vencimentos'));
+  const [periodo, setPeriodo] = useState(() => monthRangeISO());
+  const query = useMemo(() => queryString({ dataInicial: periodo.start, dataFinal: periodo.end }), [periodo]);
+  const resumo = useApi(() => api.get(`/dashboard/resumo${query}`), [query]);
+  const proximos = useApi(() => api.get(`/dashboard/proximos-vencimentos${query}`), [query]);
 
   if (resumo.loading) return <Loading />;
   if (resumo.error) return <div className="emptyState">{resumo.error}</div>;
@@ -26,8 +30,9 @@ export function Dashboard() {
     <>
       <PageHeader
         title="Dashboard"
-        subtitle={`Resumo do mes atual (${formatDate(data.periodo.dataInicial)} a ${formatDate(data.periodo.dataFinal)}).`}
+        subtitle={`Resumo do periodo (${formatDate(data.periodo.dataInicial)} a ${formatDate(data.periodo.dataFinal)}).`}
       />
+      <MonthNavigator value={periodo.start} onChange={setPeriodo} />
       <section className="alertStrip">
         <span><AlertTriangle size={18} /> {data.vencidas} vencidas</span>
         <span><CalendarClock size={18} /> {data.vencendoHoje} vencendo hoje</span>
@@ -44,7 +49,7 @@ export function Dashboard() {
       </section>
       <section className="panel">
         <div className="sectionTitle">
-          <h2>Proximos vencimentos do mes</h2>
+          <h2>Proximos vencimentos do periodo</h2>
         </div>
         {proximos.loading ? <Loading /> : (
           <div className="listStack">

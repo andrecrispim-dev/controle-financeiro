@@ -171,6 +171,47 @@ nav a.active, nav a:hover, .themeButton:hover {
   gap: 0.75rem;
   margin-bottom: 1rem;
 }
+
+.monthNavigator {
+  display: flex;
+  align-items: stretch;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.iconOnly {
+  width: 44px;
+  padding-left: 0;
+  padding-right: 0;
+  flex: 0 0 44px;
+}
+
+.monthCurrent {
+  min-height: 44px;
+  min-width: 260px;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 0.55rem 0.85rem;
+}
+
+.monthCurrent strong {
+  text-transform: capitalize;
+}
+
+.monthCurrent span {
+  color: var(--muted);
+  font-size: 0.86rem;
+  margin-left: auto;
+}
+
+.monthToday {
+  white-space: nowrap;
+}
+
 .alertStrip span {
   display: inline-flex;
   align-items: center;
@@ -378,6 +419,24 @@ th { color: var(--muted); font-size: 0.82rem; text-transform: uppercase; }
     display: grid;
     grid-template-columns: 1fr;
     gap: 0.55rem;
+  }
+  .monthNavigator {
+    display: grid;
+    grid-template-columns: 44px 1fr 44px;
+    gap: 0.5rem;
+  }
+  .monthCurrent {
+    min-width: 0;
+    justify-content: center;
+    text-align: center;
+    padding: 0.55rem 0.6rem;
+  }
+  .monthCurrent span {
+    display: none;
+  }
+  .monthToday {
+    grid-column: 1 / -1;
+    width: 100%;
   }
   .panel {
     padding: 0.85rem;

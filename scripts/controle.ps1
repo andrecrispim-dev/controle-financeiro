@@ -37,12 +37,19 @@ function Ensure-EnvFiles {
 
 function Stop-PortListeners([int]$Port) {
   $lines = netstat -ano | Select-String ":$Port\s+.*LISTENING"
+  $procIds = New-Object System.Collections.Generic.HashSet[int]
   foreach ($line in $lines) {
     if ($line.Line -match '\s(\d+)\s*$') {
-      $procId = [int]$Matches[1]
-      if ($procId -gt 0) {
-        Write-Host "  Encerrando PID $procId (porta $Port)..."
+      [void]$procIds.Add([int]$Matches[1])
+    }
+  }
+  foreach ($procId in $procIds) {
+    if ($procId -gt 0) {
+      Write-Host "  Encerrando PID $procId (porta $Port)..."
+      try {
         & taskkill /PID $procId /T /F 2>$null | Out-Null
+      } catch {
+        Write-Host "  PID $procId ja estava encerrado."
       }
     }
   }
@@ -50,8 +57,8 @@ function Stop-PortListeners([int]$Port) {
 
 function Stop-Services {
   Write-Host 'Parando servicos...'
-  & taskkill /FI 'WINDOWTITLE eq Controle Financeiro Backend*' /T /F 2>$null | Out-Null
-  & taskkill /FI 'WINDOWTITLE eq Controle Financeiro Frontend*' /T /F 2>$null | Out-Null
+  try { & taskkill /FI 'WINDOWTITLE eq Controle Financeiro Backend*' /T /F 2>$null | Out-Null } catch {}
+  try { & taskkill /FI 'WINDOWTITLE eq Controle Financeiro Frontend*' /T /F 2>$null | Out-Null } catch {}
   Stop-PortListeners -Port $script:BackendPort
   Stop-PortListeners -Port $FrontendPort
   Start-Sleep -Seconds 1

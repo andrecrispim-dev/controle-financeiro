@@ -10,6 +10,7 @@ import { Modal } from '../components/Modal.jsx';
 import { LancamentoForm } from '../components/LancamentoForm.jsx';
 import { ConfirmDialog } from '../components/ConfirmDialog.jsx';
 import { Toast } from '../components/Toast.jsx';
+import { MonthNavigator } from '../components/MonthNavigator.jsx';
 
 function filtrosIniciais() {
   const month = monthRangeISO();
@@ -36,6 +37,15 @@ export function Lancamentos() {
 
   function setFilter(field, value) {
     setFilters((current) => ({ ...current, [field]: value, pagina: 1 }));
+  }
+
+  function setMonth(month) {
+    setFilters((current) => ({
+      ...current,
+      dataInicial: month.start,
+      dataFinal: month.end,
+      pagina: 1
+    }));
   }
 
   async function save(payload) {
@@ -83,6 +93,7 @@ export function Lancamentos() {
     <>
       <PageHeader title="Lancamentos" subtitle="Cadastre, filtre e acompanhe contas a pagar e receber."
         action={<button className="primary" onClick={() => setModal({ item: null })}><Plus size={18} /> Adicionar</button>} />
+      <MonthNavigator value={filters.dataInicial} onChange={setMonth} />
       <section className="filters panel">
         <input placeholder="Descricao" value={filters.descricao} onChange={(e) => setFilter('descricao', e.target.value)} />
         <select value={filters.status} onChange={(e) => setFilter('status', e.target.value)}>

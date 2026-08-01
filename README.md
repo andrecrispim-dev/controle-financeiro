@@ -104,13 +104,14 @@ Pré-requisito: **Node.js 22 LTS** ou superior.
 ### Forma recomendada
 
 ```bat
-cd scripts
-controle.bat
+cd "D:\Projetos\Planilha Financeira\controle-financeiro"
+.\controle.bat
 ```
 
 - Sobe backend e frontend
 - `Ctrl+C` no terminal do script → **[P]**arar, **[R]**einiciar ou **[C]**ontinuar
-- Atalhos: `controle.bat parar` | `controle.bat reiniciar`
+- Atalhos: `.\controle.bat parar` | `.\controle.bat reiniciar`
+- Compatibilidade: `.\scripts\controle.bat` e `.\script\controle.bat` tambem funcionam.
 
 ### Manual
 

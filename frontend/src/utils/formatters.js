@@ -21,6 +21,18 @@ export function monthRangeISO(dateISO = todayISO()) {
   return { start, end };
 }
 
+export function monthLabel(dateISO) {
+  const [year, month] = dateISO.split('-').map(Number);
+  const date = new Date(Date.UTC(year, month - 1, 1));
+  return new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(date);
+}
+
+export function shiftMonth(dateISO, amount) {
+  const [year, month] = dateISO.split('-').map(Number);
+  const date = new Date(Date.UTC(year, month - 1 + amount, 1));
+  return date.toISOString().slice(0, 10);
+}
+
 export function queryString(filters) {
   const params = new URLSearchParams();
   Object.entries(filters).forEach(([key, value]) => {

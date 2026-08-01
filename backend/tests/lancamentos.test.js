@@ -83,6 +83,9 @@ describe('lancamentos', () => {
     expect(dash.body.data.totalPago).toBe(0);
     expect(dash.body.data.periodo).toEqual({ dataInicial: '2026-07-01', dataFinal: '2026-07-31' });
 
+    const futureDash = await request(app).get('/api/dashboard/resumo?dataInicial=2026-08-01&dataFinal=2026-08-31');
+    expect(futureDash.body.data.totalReceberPendente).toBe(500000);
+
     const report = await request(app).get('/api/relatorios/resumo?dataInicial=2026-07-01&dataFinal=2026-07-31');
     expect(report.body.data.saldoPrevisto).toBe(30000);
 

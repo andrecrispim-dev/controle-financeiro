@@ -125,9 +125,11 @@ export function setStatus(id, status, dataPagamento = null) {
   return getLancamentoById(id);
 }
 
-export function dashboardResumo() {
+export function dashboardResumo(periodo = null) {
   const hoje = todayISO();
-  const mesAtual = monthRangeISO(hoje);
+  const mesAtual = periodo
+    ? { start: periodo.dataInicial, end: periodo.dataFinal }
+    : monthRangeISO(hoje);
   const pendentes = getDb().prepare(`
     SELECT tipo, SUM(valor_centavos) as total, COUNT(*) as quantidade
     FROM lancamentos
@@ -167,8 +169,10 @@ export function dashboardResumo() {
   return resumo;
 }
 
-export function proximosVencimentos(limit = 8) {
-  const mesAtual = monthRangeISO();
+export function proximosVencimentos(limit = 8, periodo = null) {
+  const mesAtual = periodo
+    ? { start: periodo.dataInicial, end: periodo.dataFinal }
+    : monthRangeISO();
   return getDb().prepare(`
     SELECT * FROM lancamentos
     WHERE status = 'PENDENTE'
