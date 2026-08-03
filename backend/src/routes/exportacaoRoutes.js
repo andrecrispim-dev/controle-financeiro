@@ -4,3 +4,4 @@ import * as controller from '../controllers/exportacaoController.js';
 export const exportacaoRoutes = Router();
 
 exportacaoRoutes.get('/csv', controller.csv);
+exportacaoRoutes.get('/pdf', controller.pdf);

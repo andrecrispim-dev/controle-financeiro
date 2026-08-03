@@ -78,7 +78,7 @@ describe('lancamentos', () => {
     const list = await request(app).get('/api/lancamentos?tipo=RECEBER&dataInicial=2026-07-01&dataFinal=2026-07-31');
     expect(list.body.meta.total).toBe(1);
 
-    const dash = await request(app).get('/api/dashboard/resumo');
+    const dash = await request(app).get('/api/dashboard/resumo?dataInicial=2026-07-01&dataFinal=2026-07-31');
     expect(dash.body.data.saldoProjetado).toBe(30000);
     expect(dash.body.data.totalPago).toBe(0);
     expect(dash.body.data.periodo).toEqual({ dataInicial: '2026-07-01', dataFinal: '2026-07-31' });
@@ -91,5 +91,40 @@ describe('lancamentos', () => {
 
     const futureReport = await request(app).get('/api/relatorios/resumo?dataInicial=2026-08-01&dataFinal=2026-08-31');
     expect(futureReport.body.data.previstoReceber).toBe(500000);
+  });
+
+  it('gera relatorios especificos mensais, por categoria e recorrencias futuras', async () => {
+    await criarBase({ tipo: 'RECEBER', descricao: 'Salario', categoria: 'Salario', valor: 1000, dataVencimento: '2026-08-05', status: 'PENDENTE' });
+    await criarBase({ tipo: 'PAGAR', descricao: 'Aluguel', categoria: 'Moradia', valor: 300, dataVencimento: '2026-08-10', status: 'PENDENTE' });
+    await criarBase({ tipo: 'RECEBER', descricao: 'Cliente recebido', categoria: 'Clientes', valor: 700, dataVencimento: '2026-08-12', dataPagamento: '2026-08-13', status: 'CONCLUIDO' });
+    await request(app).post('/api/lancamentos').send({
+      tipo: 'PAGAR',
+      descricao: 'Internet recorrente',
+      categoria: 'Internet',
+      valor: 100,
+      dataVencimento: '2026-08-20',
+      status: 'PENDENTE',
+      recorrencia: { frequencia: 'MENSAL', quantidade: 3 }
+    });
+
+    const res = await request(app).get('/api/relatorios/especificos?dataInicial=2026-08-01&dataFinal=2026-12-31');
+
+    expect(res.status).toBe(200);
+    const agosto = res.body.data.mensal.find((item) => item.mes === '2026-08');
+    expect(agosto.receberPrevisto).toBe(100000);
+    expect(agosto.pagarPrevisto).toBe(40000);
+    expect(agosto.receberRealizado).toBe(70000);
+    expect(res.body.data.categorias.some((item) => item.categoria === 'Salario')).toBe(true);
+    expect(res.body.data.recorrenciasFuturas[0].descricao).toBe('Internet recorrente');
+  });
+
+  it('exporta relatorio filtrado em PDF', async () => {
+    await criarBase({ tipo: 'PAGAR', descricao: 'Boleto PDF', valor: 180, dataVencimento: '2026-08-18' });
+
+    const res = await request(app).get('/api/exportacoes/pdf?tipo=PAGAR&dataInicial=2026-08-01&dataFinal=2026-08-31');
+
+    expect(res.status).toBe(200);
+    expect(res.headers['content-type']).toContain('application/pdf');
+    expect(Buffer.from(res.body).toString('latin1').startsWith('%PDF')).toBe(true);
   });
 });

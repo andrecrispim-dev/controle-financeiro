@@ -34,6 +34,7 @@ export function Lancamentos() {
   const query = useMemo(() => queryString(filters), [filters]);
   const list = useApi(() => api.get(`/lancamentos${query}`), [query]);
   const categorias = useApi(() => api.get('/categorias'));
+  const contas = useApi(() => api.get('/contas?ativas=true'));
 
   function setFilter(field, value) {
     setFilters((current) => ({ ...current, [field]: value, pagina: 1 }));
@@ -106,13 +107,14 @@ export function Lancamentos() {
         <section className="panel tablePanel">
           {items.length === 0 ? <div className="emptyState">Nenhum lancamento encontrado.</div> : (
             <table>
-              <thead><tr><th>Tipo</th><th>Descricao</th><th>Categoria</th><th>Valor</th><th>Vencimento</th><th>Status</th><th>Pagamento</th><th>Acoes</th></tr></thead>
+              <thead><tr><th>Tipo</th><th>Descricao</th><th>Categoria</th><th>Conta</th><th>Valor</th><th>Vencimento</th><th>Status</th><th>Pagamento</th><th>Acoes</th></tr></thead>
               <tbody>
                 {items.map((item) => (
                   <tr key={item.id}>
                     <td data-label="Tipo"><span className={`typePill ${item.tipo.toLowerCase()}`}>{item.tipo === 'PAGAR' ? 'Pagar' : 'Receber'}</span></td>
                     <td data-label="Descricao" className="mobileTitle">{item.descricao}</td>
                     <td data-label="Categoria">{item.categoria || '-'}</td>
+                    <td data-label="Conta">{item.contaNome || '-'}</td>
                     <td data-label="Valor" className="moneyCell">{formatMoneyFromCentavos(item.valorCentavos)}</td>
                     <td data-label="Vencimento">{formatDate(item.dataVencimento)}</td>
                     <td data-label="Status"><StatusBadge item={item} /></td>
@@ -142,6 +144,7 @@ export function Lancamentos() {
           <LancamentoForm
             lancamento={modal.item}
             categorias={categorias.data?.data || []}
+            contas={contas.data?.data || []}
             onSubmit={save}
             onCancel={() => setModal(null)}
             readOnly={modal.mode === 'view'}

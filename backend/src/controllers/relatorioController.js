@@ -1,4 +1,4 @@
-import { porCategoria, porMes, relatorioPeriodo } from '../repositories/lancamentoRepository.js';
+import { porCategoria, porMes, relatorioLancamentos, relatorioPeriodo, relatoriosEspecificos } from '../repositories/lancamentoRepository.js';
 import { successResponse } from '../utils/apiResponse.js';
 import { monthRangeISO } from '../utils/dateUtils.js';
 import { filtrosLancamentosSchema } from '../validators/lancamentoValidator.js';
@@ -23,4 +23,12 @@ export function categoria(req, res) {
 
 export function mes(req, res) {
   successResponse(res, { message: 'Relatorio por mes carregado com sucesso.', data: porMes(parseFilters(req.query)) });
+}
+
+export function especificos(req, res) {
+  successResponse(res, { message: 'Relatorios especificos carregados com sucesso.', data: relatoriosEspecificos(parseFilters(req.query)) });
+}
+
+export function lancamentos(req, res) {
+  successResponse(res, { message: 'Relatorio de lancamentos carregado com sucesso.', data: relatorioLancamentos(parseFilters(req.query)) });
 }

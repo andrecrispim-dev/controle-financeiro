@@ -4,6 +4,7 @@ const initial = {
   tipo: 'PAGAR',
   descricao: '',
   categoriaId: '',
+  contaId: '',
   categoria: '',
   valor: '',
   dataVencimento: '',
@@ -13,7 +14,7 @@ const initial = {
   recorrencia: { frequencia: 'NAO_REPETIR', quantidade: 1, dataFinal: '' }
 };
 
-export function LancamentoForm({ lancamento, categorias, onSubmit, onCancel, readOnly = false, onEdit }) {
+export function LancamentoForm({ lancamento, categorias, contas = [], onSubmit, onCancel, readOnly = false, onEdit }) {
   const [form, setForm] = useState(initial);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -25,6 +26,7 @@ export function LancamentoForm({ lancamento, categorias, onSubmit, onCancel, rea
         tipo: lancamento.tipo,
         descricao: lancamento.descricao,
         categoriaId: lancamento.categoriaId || '',
+        contaId: lancamento.contaId || '',
         categoria: lancamento.categoria || '',
         valor: String(lancamento.valor),
         dataVencimento: lancamento.dataVencimento,
@@ -52,6 +54,7 @@ export function LancamentoForm({ lancamento, categorias, onSubmit, onCancel, rea
       const payload = {
         ...form,
         categoriaId: form.categoriaId || null,
+        contaId: form.contaId || null,
         valor: Number(String(form.valor).replace(',', '.')),
         recorrencia: editing ? undefined : form.recorrencia
       };
@@ -82,6 +85,12 @@ export function LancamentoForm({ lancamento, categorias, onSubmit, onCancel, rea
         <select value={form.categoriaId} onChange={(e) => update('categoriaId', e.target.value)} disabled={readOnly}>
           <option value="">Sem categoria</option>
           {categoriasFiltradas.map((cat) => <option key={cat.id} value={cat.id}>{cat.nome}</option>)}
+        </select>
+      </label>
+      <label>Conta bancaria
+        <select value={form.contaId} onChange={(e) => update('contaId', e.target.value)} disabled={readOnly}>
+          <option value="">Sem conta vinculada</option>
+          {contas.map((conta) => <option key={conta.id} value={conta.id}>{conta.nome}</option>)}
         </select>
       </label>
       <label>Valor

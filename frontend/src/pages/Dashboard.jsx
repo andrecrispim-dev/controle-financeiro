@@ -1,4 +1,4 @@
-import { AlertTriangle, CalendarClock, CheckCircle2, TrendingDown, TrendingUp, Wallet } from 'lucide-react';
+import { AlertTriangle, Building2, CalendarClock, CheckCircle2, TrendingDown, TrendingUp, Wallet } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { api } from '../services/api.js';
 import { useApi } from '../hooks/useApi.js';
@@ -22,6 +22,7 @@ export function Dashboard() {
     ['A receber pendente', data.totalReceberPendente, TrendingUp, 'receber'],
     ['A pagar pendente', data.totalPagarPendente, TrendingDown, 'pagar'],
     ['Saldo projetado', data.saldoProjetado, Wallet, 'info'],
+    ['Total nas contas', data.totalContas, Building2, 'info'],
     ['Ja recebido', data.totalRecebido, CheckCircle2, 'receber'],
     ['Ja pago', data.totalPago, CheckCircle2, 'pagar']
   ];

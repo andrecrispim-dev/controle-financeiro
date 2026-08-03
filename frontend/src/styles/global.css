@@ -230,6 +230,16 @@ nav a.active, nav a:hover, .themeButton:hover {
 }
 .filters.compact { grid-template-columns: repeat(2, minmax(180px, 260px)); }
 label { display: grid; gap: 0.35rem; color: var(--muted); font-size: 0.9rem; }
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 44px;
+  color: var(--text);
+}
+.checkboxLabel input {
+  width: auto;
+}
 input, select, textarea {
   width: 100%;
   color: var(--text);
@@ -245,6 +255,17 @@ input[readonly], textarea[readonly], select:disabled {
   cursor: default;
 }
 textarea { resize: vertical; }
+.inlineField {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 44px;
+  gap: 0.5rem;
+  align-items: center;
+}
+.inlineField .addInline {
+  width: 44px;
+  height: 44px;
+  color: var(--primary);
+}
 
 .tablePanel { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; min-width: 900px; }
@@ -338,6 +359,55 @@ th { color: var(--muted); font-size: 0.82rem; text-transform: uppercase; }
 
 .chartGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 .wideChart { grid-column: 1 / -1; }
+.reportFilters { align-items: end; }
+.reportBlock { margin-top: 1rem; }
+.chartReport { overflow-x: auto; }
+.chartReport .recharts-responsive-container { min-width: 520px; }
+.reportHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.reportHeader h2 { margin: 0 0 0.2rem; }
+.reportHeader p { margin: 0; color: var(--muted); }
+.reportActions {
+  display: flex;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+.reportTotals {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(160px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+.reportTotals article {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.8rem;
+  background: var(--surface-2);
+}
+.reportTotals span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.84rem;
+  margin-bottom: 0.25rem;
+}
+.reportTotals strong {
+  color: var(--primary);
+  font-size: 1.15rem;
+}
+.reportTableWrap { overflow-x: auto; }
+.reportTable {
+  min-width: 940px;
+  font-size: 0.92rem;
+}
+.reportTable td, .reportTable th { white-space: nowrap; }
+.positiveText { color: var(--receive); font-weight: 700; }
+.negativeText { color: var(--pay); font-weight: 700; }
+.emptyState.compact { padding: 1rem; }
 .emptyState, .loading {
   border: 1px dashed var(--border);
   border-radius: 8px;
@@ -538,6 +608,51 @@ th { color: var(--muted); font-size: 0.82rem; text-transform: uppercase; }
   }
   .chartPanel .recharts-responsive-container {
     min-width: 320px;
+  }
+  .reportHeader {
+    display: grid;
+  }
+  .reportActions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .reportTotals {
+    grid-template-columns: 1fr;
+  }
+  .reportTableWrap {
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+  }
+  .reportTable {
+    display: table;
+    width: 100%;
+  }
+  .reportTable thead { display: table-header-group; }
+  .reportTable tbody { display: table-row-group; }
+  .reportTable thead {
+    position: static;
+    height: auto;
+    margin: 0;
+    clip: auto;
+    white-space: normal;
+  }
+  .reportTable tr {
+    display: table-row;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    padding: 0;
+    margin: 0;
+  }
+  .reportTable th,
+  .reportTable td {
+    display: table-cell;
+    width: auto;
+    padding: 0.72rem 0.65rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .reportTable td::before {
+    content: none;
   }
   .modalBackdrop {
     align-items: end;

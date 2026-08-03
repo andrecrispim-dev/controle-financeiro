@@ -11,14 +11,18 @@ import {
   updateLancamento
 } from '../repositories/lancamentoRepository.js';
 import { getCategoriaById } from '../repositories/categoriaRepository.js';
+import { getContaById } from '../repositories/contaRepository.js';
 
 function normalizePayload(payload) {
   const categoria = payload.categoriaId ? getCategoriaById(payload.categoriaId) : null;
   if (payload.categoriaId && !categoria) throw new AppError('Categoria nao encontrada.', 404);
+  const conta = payload.contaId ? getContaById(payload.contaId) : null;
+  if (payload.contaId && !conta) throw new AppError('Conta bancaria nao encontrada.', 404);
   return {
     tipo: payload.tipo,
     descricao: payload.descricao,
     categoriaId: payload.categoriaId || null,
+    contaId: payload.contaId || null,
     categoria: categoria?.nome || payload.categoria || null,
     valorCentavos: payload.valor,
     dataVencimento: payload.dataVencimento,

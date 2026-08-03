@@ -14,6 +14,8 @@ import { dashboardRoutes } from './routes/dashboardRoutes.js';
 import { relatorioRoutes } from './routes/relatorioRoutes.js';
 import { exportacaoRoutes } from './routes/exportacaoRoutes.js';
 import { backupRoutes } from './routes/backupRoutes.js';
+import { contaRoutes } from './routes/contaRoutes.js';
+import { bancoRoutes } from './routes/bancoRoutes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -38,6 +40,8 @@ app.use(morgan(env.nodeEnv === 'production' ? 'combined' : 'dev'));
 app.get('/api/health', (req, res) => res.json({ success: true, message: 'API online.' }));
 app.use('/api/lancamentos', lancamentoRoutes);
 app.use('/api/categorias', categoriaRoutes);
+app.use('/api/bancos', bancoRoutes);
+app.use('/api/contas', contaRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/relatorios', relatorioRoutes);
 app.use('/api/exportacoes', exportacaoRoutes);

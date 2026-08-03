@@ -26,5 +26,6 @@ export const api = {
   patch: (path, data = {}) => request(path, { method: 'PATCH', body: JSON.stringify(data) }),
   delete: (path) => request(path, { method: 'DELETE' }),
   csvUrl: (query = '') => `${API_URL}/exportacoes/csv${query}`,
+  pdfUrl: (query = '') => `${API_URL}/exportacoes/pdf${query}`,
   backupDownloadUrl: (arquivo) => `${API_URL}/backups/${encodeURIComponent(arquivo)}/download`
 };
