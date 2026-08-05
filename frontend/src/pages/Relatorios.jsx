@@ -388,23 +388,23 @@ export function Relatorios() {
                   </BarChart>
                 </ResponsiveContainer>
               )}
-              <div className="reportTableWrap">
-                <table className="reportTable">
+              <div className="reportTableWrap cartaoCategoryTableWrap">
+                <table className="reportTable cartaoCategoryTable">
                   <thead><tr><th>Categoria</th><th>Quantidade</th><th>Total</th></tr></thead>
                   <tbody>
                     {items.length === 0 ? <tr><td colSpan="3">Nenhum gasto de cartao encontrado.</td></tr> : items.map((item) => (
                       <tr key={`${item.categoria}-${item.categoriaId || 'semcat'}`}>
-                        <td>{item.categoria || 'Sem categoria'}</td>
-                        <td>{item.quantidade}</td>
-                        <td className="negativeText">{formatMoneyFromCentavos(item.totalCentavos)}</td>
+                        <td data-label="Categoria" className="mobileTitle">{item.categoria || 'Sem categoria'}</td>
+                        <td data-label="Quantidade">{item.quantidade}</td>
+                        <td data-label="Total" className="negativeText">{formatMoneyFromCentavos(item.totalCentavos)}</td>
                       </tr>
                     ))}
                   </tbody>
                   {items.length > 0 && (
                     <tfoot>
-                      <tr>
-                        <th>Total agrupado</th>
-                        <th>{cartaoTotais.quantidade} {executed.faturaQuantidadeItens ? `/ ${executed.faturaQuantidadeItens}` : ''}</th>
+                      <tr className="cartaoCategoryTotalRow">
+                        <th data-label="Total">Total agrupado</th>
+                        <th data-label="Quantidade">{cartaoTotais.quantidade} {executed.faturaQuantidadeItens ? `/ ${executed.faturaQuantidadeItens}` : ''}</th>
                         <th className={cartaoTotais.totalCentavos === executed.faturaValorTotalCentavos ? 'positiveText' : 'negativeText'}>
                           {formatMoneyFromCentavos(cartaoTotais.totalCentavos)}
                           {executed.faturaValorTotalCentavos ? ` / ${formatMoneyFromCentavos(executed.faturaValorTotalCentavos)}` : ''}

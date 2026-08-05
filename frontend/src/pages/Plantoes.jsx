@@ -216,7 +216,7 @@ export function Plantoes() {
               <article key={item.hospital} className="panel hospitalCard">
                 <div>
                   <span className="muted"><Hospital size={16} /> {item.hospital}</span>
-                  <strong>{formatMoneyFromCentavos(item.totalCentavos)}</strong>
+                  <strong>{formatMoneyFromCentavos(item.totalBaseCentavos)}</strong>
                   {item.totalExtrasCentavos > 0 && (
                     <span className="hospitalExtra">+ {formatMoneyFromCentavos(item.totalExtrasCentavos)} em extras</span>
                   )}
@@ -266,7 +266,16 @@ export function Plantoes() {
                         );
                       })}
                     </span>
-                    {items.length > 0 && <small>{formatMoneyFromCentavos(items.reduce((sum, item) => sum + item.valorTotalCentavos, 0))}</small>}
+                    {items.length > 0 && (
+                      <small>
+                        {formatMoneyFromCentavos(items.reduce((sum, item) => sum + item.valorBaseCentavos, 0))}
+                        {items.some((item) => item.valorExtrasCentavos > 0) && (
+                          <span className="calendarExtra">
+                            + {formatMoneyFromCentavos(items.reduce((sum, item) => sum + item.valorExtrasCentavos, 0))}
+                          </span>
+                        )}
+                      </small>
+                    )}
                   </button>
                 );
               })}

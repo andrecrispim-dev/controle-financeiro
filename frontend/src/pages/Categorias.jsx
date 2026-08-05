@@ -41,6 +41,14 @@ export function Categorias() {
     }
   }
 
+  function tipoBadgeClass(tipo) {
+    return {
+      PAGAR: 'categoryPay',
+      RECEBER: 'categoryReceive',
+      AMBOS: 'categoryBoth'
+    }[tipo] || 'categoryBoth';
+  }
+
   return (
     <>
       <PageHeader title="Categorias" subtitle="Organize entradas e saidas por grupos."
@@ -52,7 +60,7 @@ export function Categorias() {
             <tbody>{(list.data?.data || []).map((item) => (
               <tr key={item.id}>
                 <td data-label="Nome" className="mobileTitle">{item.nome}</td>
-                <td data-label="Tipo"><span className="badge info">{item.tipo}</span></td>
+                <td data-label="Tipo"><span className={`badge ${tipoBadgeClass(item.tipo)}`}>{item.tipo}</span></td>
                 <td data-label="Acoes" className="actions">
                   <button className="iconButton" onClick={() => setModal(item)} aria-label="Editar"><Edit size={17} /></button>
                   <button className="iconButton dangerIcon" onClick={() => setConfirm({ item })} aria-label="Excluir"><Trash2 size={17} /></button>

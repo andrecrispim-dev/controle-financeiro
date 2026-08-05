@@ -46,7 +46,12 @@ function buildRecorrencias(base, recorrencia) {
   let current = base.dataVencimento;
   for (let index = 0; index < limite; index += 1) {
     if (final && current > final) break;
-    items.push({ ...base, dataVencimento: current });
+    const item = { ...base, dataVencimento: current };
+    if (index > 0 && base.status === 'CONCLUIDO') {
+      item.status = 'PENDENTE';
+      item.dataPagamento = null;
+    }
+    items.push(item);
     current = step(current);
   }
   return items;

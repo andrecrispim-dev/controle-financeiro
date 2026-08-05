@@ -32,6 +32,9 @@ app.use(helmet({
 app.use(cors({
   origin(origin, callback) {
     if (!origin || env.corsOrigins.includes(origin)) return callback(null, true);
+    if (env.nodeEnv !== 'production' && /^https?:\/\/(localhost|127\.0\.0\.1|192\.168\.\d{1,3}\.\d{1,3}|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3})(:\d+)?$/.test(origin)) {
+      return callback(null, true);
+    }
     return callback(new Error('Origem nao permitida pelo CORS.'));
   }
 }));

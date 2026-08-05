@@ -10,6 +10,7 @@ import {
   deleteFeriado,
   deleteLancamentoPlantao,
   deletePlantao,
+  existsPlantaoMesmoTurno,
   getFeriadoById,
   getPlantaoById,
   getPlantaoValor,
@@ -108,6 +109,14 @@ function calculatePlantao(payload, db) {
   };
 }
 
+function assertTurnoDisponivel(payload, ignoreId, db) {
+  if (existsPlantaoMesmoTurno(payload.data, payload.tipo, ignoreId, db)) {
+    throw new AppError('Ja existe um plantao deste turno cadastrado neste dia.', 409, [
+      { field: 'tipo', message: 'Nao e permitido cadastrar dois plantoes do mesmo turno no mesmo dia.' }
+    ]);
+  }
+}
+
 function assertCanSyncConcluido(hospital, mes, confirmar, db) {
   const vinculo = getVinculoLancamento(hospital, mes, db);
   if (vinculo?.lancamentoStatus === 'CONCLUIDO' && !confirmar) {
@@ -152,6 +161,7 @@ export function criarPlantao(payload) {
   return transaction((db) => {
     const mes = mesFromDate(payload.data);
     assertCanSyncConcluido(payload.hospital, mes, payload.confirmarAtualizacaoConcluido, db);
+    assertTurnoDisponivel(payload, null, db);
     const created = createPlantao(calculatePlantao(payload, db), db);
     syncLancamentoExistente(payload.hospital, mes, db);
     return created;
@@ -167,6 +177,7 @@ export function editarPlantao(id, payload) {
     hospitaisAfetados.forEach((hospital) => {
       mesesAfetados.forEach((mes) => assertCanSyncConcluido(hospital, mes, payload.confirmarAtualizacaoConcluido, db));
     });
+    assertTurnoDisponivel(payload, id, db);
     const updated = updatePlantao(id, calculatePlantao(payload, db), db);
     hospitaisAfetados.forEach((hospital) => {
       mesesAfetados.forEach((mes) => syncLancamentoExistente(hospital, mes, db));

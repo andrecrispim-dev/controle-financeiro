@@ -298,16 +298,16 @@ export function Faturas() {
                   <tbody>
                     {grupo.itens.map((item) => (
                       <tr key={item.id}>
-                        <td>{formatDate(item.dataCompra)}</td>
-                        <td><strong>{item.descricao}</strong><span>{item.cidade || '-'}</span>{item.moeda && <em>{item.moeda}</em>}</td>
-                        <td>
+                        <td data-label="Data">{formatDate(item.dataCompra)}</td>
+                        <td data-label="Estabelecimento" className="invoiceItemName"><strong>{item.descricao}</strong><span>{item.cidade || '-'}</span>{item.moeda && <em>{item.moeda}</em>}</td>
+                        <td data-label="Categoria">
                           <select className="tableSelect" value={item.categoriaId || ''} onChange={(e) => updateSavedItemCategory(item.id, e.target.value)}>
                             <option value="">Sem categoria</option>
                             {categoriasPagar.map((categoria) => <option key={categoria.id} value={categoria.id}>{categoria.nome}</option>)}
                           </select>
                         </td>
-                        <td>{item.tipo === 'PARCELADO' ? <span className="invoiceTag parc">parc {item.parcela || '-'}</span> : <span className="invoiceTag avista">a vista</span>}{item.ambiguo && <span className="invoiceTag warn">ambiguo</span>}</td>
-                        <td className="negativeText">{formatMoneyFromCentavos(item.valorCentavos)}</td>
+                        <td data-label="Tipo" className="invoiceItemTags">{item.tipo === 'PARCELADO' ? <span className="invoiceTag parc">parc {item.parcela || '-'}</span> : <span className="invoiceTag avista">a vista</span>}{item.ambiguo && <span className="invoiceTag warn">ambiguo</span>}</td>
+                        <td data-label="Valor" className="negativeText invoiceItemValue">{formatMoneyFromCentavos(item.valorCentavos)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -396,17 +396,17 @@ export function Faturas() {
                     const itemIndex = fatura.grupos[groupIndex]?.itens.indexOf(item) ?? index;
                     return (
                       <tr key={`${item.descricao}-${item.data}-${index}`}>
-                        <td>{item.data}</td>
-                        <td>{item.descricao}<span className="mutedBlock">{item.cidade || '-'}</span>{item.moeda && <span className="mutedBlock">{item.moeda}</span>}</td>
-                        <td>
+                        <td data-label="Data">{item.data}</td>
+                        <td data-label="Estabelecimento" className="invoiceItemName">{item.descricao}<span className="mutedBlock">{item.cidade || '-'}</span>{item.moeda && <span className="mutedBlock">{item.moeda}</span>}</td>
+                        <td data-label="Categoria">
                           <select className="tableSelect" value={item.categoriaId || ''} onChange={(e) => updateItemCategory(groupIndex, itemIndex, e.target.value)}>
                             <option value="">Sem categoria</option>
                             {categoriasPagar.map((categoria) => <option key={categoria.id} value={categoria.id}>{categoria.nome}</option>)}
                           </select>
                         </td>
-                        <td>{item.tipo === 'PARCELADO' ? 'Parcelado' : 'A vista'}</td>
-                        <td>{item.parcela || '-'}</td>
-                        <td className="negativeText">{formatMoneyFromCentavos(item.valorCentavos)}</td>
+                        <td data-label="Tipo">{item.tipo === 'PARCELADO' ? 'Parcelado' : 'A vista'}</td>
+                        <td data-label="Parcela">{item.parcela || '-'}</td>
+                        <td data-label="Valor" className="negativeText invoiceItemValue">{formatMoneyFromCentavos(item.valorCentavos)}</td>
                       </tr>
                     );
                   })}
@@ -442,13 +442,13 @@ export function Faturas() {
                 <tbody>
                   {importedItems.map((item) => (
                     <tr key={item.id}>
-                      <td>{item.descricao}</td>
-                      <td>{item.banco}</td>
-                      <td>{item.contaNome || '-'}</td>
-                      <td>{formatDate(item.dataVencimento)}</td>
-                      <td><span className={`badge ${(item.status || 'pendente').toLowerCase()}`}>{item.status || '-'}</span></td>
-                      <td>{item.quantidadeItens}</td>
-                      <td className="negativeText">{formatMoneyFromCentavos(item.valorTotalCentavos)}</td>
+                      <td data-label="Descricao" className="mobileTitle">{item.descricao}</td>
+                      <td data-label="Banco">{item.banco}</td>
+                      <td data-label="Conta">{item.contaNome || '-'}</td>
+                      <td data-label="Vencimento">{formatDate(item.dataVencimento)}</td>
+                      <td data-label="Status"><span className={`badge ${(item.status || 'pendente').toLowerCase()}`}>{item.status || '-'}</span></td>
+                      <td data-label="Itens">{item.quantidadeItens}</td>
+                      <td data-label="Total" className="negativeText">{formatMoneyFromCentavos(item.valorTotalCentavos)}</td>
                       <td className="actions">
                         <button className="iconButton" onClick={() => viewFatura(item)} aria-label="Visualizar fatura"><Eye size={17} /></button>
                         <button className="iconButton dangerIcon" onClick={() => setConfirmDelete(item)} aria-label="Excluir fatura"><Trash2 size={17} /></button>

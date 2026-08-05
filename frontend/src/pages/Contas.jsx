@@ -110,12 +110,13 @@ export function Contas() {
         <section className="panel tablePanel">
           {contas.length === 0 ? <div className="emptyState">Nenhuma conta cadastrada.</div> : (
             <table>
-              <thead><tr><th>Nome</th><th>Banco</th><th>Saldo inicial</th><th>Saldo atual</th><th>Status</th><th>Acoes</th></tr></thead>
+              <thead><tr><th>Nome</th><th>Banco</th><th>Saldo inicial</th><th>Movimentacao concluida</th><th>Saldo atual</th><th>Status</th><th>Acoes</th></tr></thead>
               <tbody>{contas.map((item) => (
                 <tr key={item.id}>
                   <td data-label="Nome" className="mobileTitle">{item.nome}</td>
                   <td data-label="Banco">{item.banco || '-'}</td>
                   <td data-label="Saldo inicial">{formatMoneyFromCentavos(item.saldoInicialCentavos)}</td>
+                  <td data-label="Movimentacao concluida" className={item.movimentacaoConcluidaCentavos >= 0 ? 'positiveText' : 'negativeText'}>{formatMoneyFromCentavos(item.movimentacaoConcluidaCentavos)}</td>
                   <td data-label="Saldo atual" className="moneyCell">{formatMoneyFromCentavos(item.saldoAtualCentavos)}</td>
                   <td data-label="Status"><span className={`badge ${item.ativa ? 'concluido' : 'cancelado'}`}>{item.ativa ? 'ATIVA' : 'INATIVA'}</span></td>
                   <td data-label="Acoes" className="actions">

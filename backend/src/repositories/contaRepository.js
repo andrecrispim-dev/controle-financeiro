@@ -10,6 +10,7 @@ function mapConta(row) {
     agencia: row.agencia,
     numero: row.numero,
     saldoInicialCentavos: row.saldo_inicial_centavos,
+    movimentacaoConcluidaCentavos: row.movimentacao_concluida_centavos ?? 0,
     saldoAtualCentavos: row.saldo_atual_centavos ?? row.saldo_inicial_centavos,
     ativa: Boolean(row.ativa),
     observacoes: row.observacoes,
@@ -18,8 +19,8 @@ function mapConta(row) {
   };
 }
 
-const saldoExpression = `
-  c.saldo_inicial_centavos + COALESCE(SUM(
+const movimentacaoExpression = `
+  COALESCE(SUM(
     CASE
       WHEN l.status = 'CONCLUIDO' AND l.tipo = 'RECEBER' THEN l.valor_centavos
       WHEN l.status = 'CONCLUIDO' AND l.tipo = 'PAGAR' THEN -l.valor_centavos
@@ -28,9 +29,15 @@ const saldoExpression = `
   ), 0)
 `;
 
+const saldoExpression = `
+  c.saldo_inicial_centavos + ${movimentacaoExpression}
+`;
+
 export function listContas() {
   return getDb().prepare(`
-    SELECT c.*, COALESCE(b.nome, c.banco) AS banco_nome, ${saldoExpression} AS saldo_atual_centavos
+    SELECT c.*, COALESCE(b.nome, c.banco) AS banco_nome,
+      ${movimentacaoExpression} AS movimentacao_concluida_centavos,
+      ${saldoExpression} AS saldo_atual_centavos
     FROM contas_bancarias c
     LEFT JOIN bancos b ON b.id = c.banco_id
     LEFT JOIN lancamentos l ON l.conta_id = c.id
@@ -41,7 +48,9 @@ export function listContas() {
 
 export function listContasAtivas() {
   return getDb().prepare(`
-    SELECT c.*, COALESCE(b.nome, c.banco) AS banco_nome, ${saldoExpression} AS saldo_atual_centavos
+    SELECT c.*, COALESCE(b.nome, c.banco) AS banco_nome,
+      ${movimentacaoExpression} AS movimentacao_concluida_centavos,
+      ${saldoExpression} AS saldo_atual_centavos
     FROM contas_bancarias c
     LEFT JOIN bancos b ON b.id = c.banco_id
     LEFT JOIN lancamentos l ON l.conta_id = c.id
@@ -53,7 +62,9 @@ export function listContasAtivas() {
 
 export function getContaById(id) {
   return mapConta(getDb().prepare(`
-    SELECT c.*, COALESCE(b.nome, c.banco) AS banco_nome, ${saldoExpression} AS saldo_atual_centavos
+    SELECT c.*, COALESCE(b.nome, c.banco) AS banco_nome,
+      ${movimentacaoExpression} AS movimentacao_concluida_centavos,
+      ${saldoExpression} AS saldo_atual_centavos
     FROM contas_bancarias c
     LEFT JOIN bancos b ON b.id = c.banco_id
     LEFT JOIN lancamentos l ON l.conta_id = c.id

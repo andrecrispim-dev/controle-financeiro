@@ -38,6 +38,28 @@ describe('lancamentos', () => {
     expect(res.body.data[0].valorCentavos).toBe(25075);
   });
 
+  it('mantem recorrencias futuras pendentes quando o primeiro lancamento nasce concluido', async () => {
+    const res = await request(app).post('/api/lancamentos').send({
+      tipo: 'RECEBER',
+      descricao: 'Salario recorrente',
+      categoria: 'Salario',
+      valor: 5000,
+      dataVencimento: '2026-08-01',
+      dataPagamento: '2026-08-01',
+      status: 'CONCLUIDO',
+      recorrencia: { frequencia: 'MENSAL', quantidade: 3 }
+    });
+
+    expect(res.status).toBe(201);
+    expect(res.body.data).toHaveLength(3);
+    expect(res.body.data[0].status).toBe('CONCLUIDO');
+    expect(res.body.data[0].dataPagamento).toBe('2026-08-01');
+    expect(res.body.data[1].status).toBe('PENDENTE');
+    expect(res.body.data[1].dataPagamento).toBeNull();
+    expect(res.body.data[2].status).toBe('PENDENTE');
+    expect(res.body.data[2].dataPagamento).toBeNull();
+  });
+
   it('valida valor maior que zero', async () => {
     const res = await request(app).post('/api/lancamentos').send({
       tipo: 'PAGAR',

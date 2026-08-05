@@ -105,6 +105,17 @@ export function getPlantaoById(id) {
   return mapPlantao(getDb().prepare('SELECT * FROM plantoes WHERE id = ?').get(id));
 }
 
+export function existsPlantaoMesmoTurno(data, tipo, ignoreId = null, db = getDb()) {
+  const row = db.prepare(`
+    SELECT COUNT(*) total
+    FROM plantoes
+    WHERE data = @data
+      AND tipo = @tipo
+      AND (@ignoreId IS NULL OR id <> @ignoreId)
+  `).get({ data, tipo, ignoreId });
+  return row.total > 0;
+}
+
 export function createPlantao(data, db = getDb()) {
   const result = db.prepare(`
     INSERT INTO plantoes (

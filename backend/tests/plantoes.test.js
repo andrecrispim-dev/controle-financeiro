@@ -64,4 +64,25 @@ describe('plantoes', () => {
     expect(unimed.totalCentavos).toBe(191300);
     expect(unimed.lancamento.lancamentoValorCentavos).toBe(191300);
   });
+
+  it('bloqueia dois plantoes do mesmo turno no mesmo dia', async () => {
+    const first = await request(app).post('/api/plantoes').send({
+      data: '2026-08-10',
+      hospital: 'UNIMED',
+      tipo: 'NOTURNO',
+      quantidadeExtras: 0
+    });
+
+    expect(first.status).toBe(201);
+
+    const duplicate = await request(app).post('/api/plantoes').send({
+      data: '2026-08-10',
+      hospital: 'IPIS',
+      tipo: 'NOTURNO',
+      quantidadeExtras: 0
+    });
+
+    expect(duplicate.status).toBe(409);
+    expect(duplicate.body.message).toBe('Ja existe um plantao deste turno cadastrado neste dia.');
+  });
 });

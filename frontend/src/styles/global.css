@@ -155,6 +155,9 @@ nav a.active, nav a:hover, .themeButton:hover {
   gap: 1rem;
   margin-bottom: 1rem;
 }
+.summaryGrid.dashboardGrid {
+  grid-template-columns: repeat(3, minmax(220px, 1fr));
+}
 .summaryGrid.report { grid-template-columns: repeat(3, minmax(180px, 1fr)); }
 .summaryCard {
   border: 1px solid var(--border);
@@ -302,6 +305,18 @@ th { color: var(--muted); font-size: 0.82rem; text-transform: uppercase; }
 .typePill.receber, .badge.concluido { color: var(--receive); background: color-mix(in srgb, var(--receive) 12%, var(--surface)); }
 .badge.pendente, .badge.hoje { color: var(--warn); background: color-mix(in srgb, var(--warn) 12%, var(--surface)); }
 .badge.cancelado { color: var(--muted); }
+.badge.categoryPay {
+  color: var(--pay);
+  background: color-mix(in srgb, var(--pay) 12%, var(--surface));
+}
+.badge.categoryReceive {
+  color: var(--receive);
+  background: color-mix(in srgb, var(--receive) 12%, var(--surface));
+}
+.badge.categoryBoth {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+}
 
 .listStack { display: grid; gap: 0.75rem; }
 .dueItem {
@@ -549,12 +564,18 @@ th { color: var(--muted); font-size: 0.82rem; text-transform: uppercase; }
 .dayNumber {
   font-weight: 900;
   font-size: 1rem;
+  text-align: center;
+  justify-self: center;
+  width: 100%;
 }
 .dayIcons {
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
   min-height: 1.5rem;
+  justify-content: center;
+  justify-self: center;
+  width: 100%;
 }
 .plantaoIcon {
   width: 1.65rem;
@@ -603,6 +624,13 @@ th { color: var(--muted); font-size: 0.82rem; text-transform: uppercase; }
 .calendarDay small {
   color: var(--accent);
   font-weight: 800;
+  display: grid;
+  justify-items: center;
+  gap: 0.1rem;
+}
+.calendarExtra {
+  color: var(--success);
+  font-size: 0.78rem;
 }
 .dayModalList {
   display: grid;
@@ -1052,7 +1080,7 @@ th { color: var(--muted); font-size: 0.82rem; text-transform: uppercase; }
 }
 
 @media (max-width: 1100px) {
-  .summaryGrid, .summaryGrid.report { grid-template-columns: repeat(2, minmax(160px, 1fr)); }
+  .summaryGrid, .summaryGrid.report, .summaryGrid.dashboardGrid { grid-template-columns: repeat(2, minmax(160px, 1fr)); }
   .filters { grid-template-columns: repeat(3, minmax(130px, 1fr)); }
   .cardReportFilters {
     grid-template-columns: 1fr 1fr;
@@ -1103,7 +1131,7 @@ th { color: var(--muted); font-size: 0.82rem; text-transform: uppercase; }
   .pageActions button {
     flex: 1 1 180px;
   }
-  .summaryGrid, .summaryGrid.report, .chartGrid, .filters, .filters.compact, .formGrid { grid-template-columns: 1fr; }
+  .summaryGrid, .summaryGrid.report, .summaryGrid.dashboardGrid, .chartGrid, .filters, .filters.compact, .formGrid { grid-template-columns: 1fr; }
   .cardReportFilters {
     grid-template-columns: 1fr;
   }
@@ -1532,5 +1560,315 @@ th { color: var(--muted); font-size: 0.82rem; text-transform: uppercase; }
 
   .settingsPanel button {
     width: 100%;
+  }
+}
+
+@media (max-width: 780px) {
+  .invoiceImporter {
+    gap: 1rem;
+  }
+
+  .invoiceTitle h1,
+  .viewerPageHeader h1 {
+    font-size: 1.45rem;
+    line-height: 1.12;
+  }
+
+  .invoiceTitle p,
+  .viewerPageHeader p {
+    font-size: 0.96rem;
+    line-height: 1.35;
+  }
+
+  .invoiceFilebar {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+  }
+
+  .invoiceFilebar .buttonLink,
+  .viewerPageHeader .secondary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .invoiceHistory .reportTableWrap,
+  .invoicePreview .reportTableWrap,
+  .viewerGroups .reportTableWrap {
+    overflow: visible;
+    padding-bottom: 0;
+  }
+
+  .invoiceHistoryTable,
+  .invoicePreview .reportTable,
+  .viewerInvoiceTable {
+    min-width: 0;
+    display: block;
+    width: 100%;
+    border-collapse: separate;
+  }
+
+  .invoiceHistoryTable thead,
+  .invoicePreview .reportTable thead,
+  .viewerInvoiceTable thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .invoiceHistoryTable tbody,
+  .invoiceHistoryTable tr,
+  .invoiceHistoryTable td,
+  .invoicePreview .reportTable tbody,
+  .invoicePreview .reportTable tr,
+  .invoicePreview .reportTable td,
+  .viewerInvoiceTable tbody,
+  .viewerInvoiceTable tr,
+  .viewerInvoiceTable td {
+    display: block;
+    width: 100%;
+  }
+
+  .invoiceHistoryTable tr,
+  .invoicePreview .reportTable tr,
+  .viewerInvoiceTable tr {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.8rem;
+    margin: 0 0 0.75rem;
+  }
+
+  .invoiceHistoryTable td,
+  .invoicePreview .reportTable td,
+  .viewerInvoiceTable td {
+    display: grid;
+    grid-template-columns: minmax(7rem, 34%) minmax(0, 1fr);
+    gap: 0.65rem;
+    align-items: center;
+    border: 0;
+    padding: 0.38rem 0;
+    min-height: 0;
+    white-space: normal;
+  }
+
+  .invoiceHistoryTable td::before,
+  .invoicePreview .reportTable td::before,
+  .viewerInvoiceTable td::before {
+    content: attr(data-label);
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  .invoiceHistoryTable td.mobileTitle,
+  .viewerInvoiceTable td.invoiceItemName,
+  .invoicePreview .reportTable td.invoiceItemName {
+    display: block;
+    padding-bottom: 0.55rem;
+  }
+
+  .invoiceHistoryTable td.mobileTitle::before,
+  .viewerInvoiceTable td.invoiceItemName::before,
+  .invoicePreview .reportTable td.invoiceItemName::before {
+    content: none;
+  }
+
+  .viewerInvoiceTable td.invoiceItemName strong,
+  .invoicePreview .reportTable td.invoiceItemName {
+    font-size: 1rem;
+    line-height: 1.25;
+  }
+
+  .viewerInvoiceTable td.invoiceItemName span,
+  .viewerInvoiceTable td.invoiceItemName em,
+  .invoicePreview .reportTable .mutedBlock {
+    margin-top: 0.25rem;
+  }
+
+  .viewerInvoiceTable td .tableSelect,
+  .invoicePreview .reportTable td .tableSelect {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .viewerInvoiceTable td.invoiceItemTags {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .viewerInvoiceTable td.invoiceItemTags::before {
+    flex: 0 0 7rem;
+  }
+
+  .viewerInvoiceTable td.invoiceItemValue,
+  .invoicePreview .reportTable td.invoiceItemValue {
+    font-size: 1.05rem;
+    font-weight: 800;
+  }
+
+  .invoiceHistoryTable td.actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    padding-top: 0.65rem;
+  }
+
+  .invoiceHistoryTable td.actions::before {
+    content: none;
+  }
+
+  .invoiceHistoryTable td.actions .iconButton {
+    width: 100%;
+    min-height: 42px;
+  }
+
+  .viewerControls {
+    grid-template-columns: 1fr 1fr;
+    padding: 0.75rem;
+    gap: 0.55rem;
+  }
+
+  .viewerControls input,
+  .viewerControls select {
+    grid-column: 1 / -1;
+  }
+
+  .viewerControls button {
+    min-height: 42px;
+    padding-inline: 0.65rem;
+  }
+
+  .invoiceViewerSummary {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.65rem;
+  }
+
+  .invoiceViewerSummary article {
+    min-height: 0;
+    padding: 0.75rem;
+  }
+
+  .invoiceGroupCard header {
+    display: grid;
+    gap: 0.55rem;
+    padding: 0.85rem;
+  }
+
+  .invoiceGroupTotal {
+    font-size: 1.05rem;
+  }
+
+  .cartaoCategoryTableWrap {
+    overflow: visible;
+    padding-bottom: 0;
+  }
+
+  .cartaoCategoryTable {
+    min-width: 0;
+    display: block;
+    width: 100%;
+    border-collapse: separate;
+  }
+
+  .cartaoCategoryTable thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .cartaoCategoryTable tbody,
+  .cartaoCategoryTable tfoot,
+  .cartaoCategoryTable tr,
+  .cartaoCategoryTable td,
+  .cartaoCategoryTable th {
+    display: block;
+    width: 100%;
+  }
+
+  .cartaoCategoryTable tr {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.78rem;
+    margin-bottom: 0.7rem;
+  }
+
+  .cartaoCategoryTable td,
+  .cartaoCategoryTable th {
+    display: grid;
+    grid-template-columns: minmax(7rem, 34%) minmax(0, 1fr);
+    gap: 0.65rem;
+    align-items: center;
+    border: 0;
+    padding: 0.35rem 0;
+    text-align: left;
+    white-space: normal;
+  }
+
+  .cartaoCategoryTable td::before,
+  .cartaoCategoryTable th::before {
+    content: attr(data-label);
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  .cartaoCategoryTable td.mobileTitle {
+    display: block;
+    font-size: 1.02rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .cartaoCategoryTable td.mobileTitle::before {
+    content: none;
+  }
+
+  .cartaoCategoryTable tfoot tr {
+    border-color: color-mix(in srgb, var(--primary) 38%, var(--border));
+    background: var(--surface-2);
+  }
+}
+
+@media (max-width: 420px) {
+  .invoiceViewerSummary {
+    grid-template-columns: 1fr;
+  }
+
+  .viewerControls {
+    grid-template-columns: 1fr;
+  }
+
+  .invoiceHistoryTable td,
+  .invoicePreview .reportTable td,
+  .viewerInvoiceTable td {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+  }
+
+  .viewerInvoiceTable td.invoiceItemTags::before {
+    flex-basis: 100%;
+  }
+
+  .cartaoCategoryTable td,
+  .cartaoCategoryTable th {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
   }
 }

@@ -95,6 +95,7 @@ function Start-Services {
   Write-Host 'Servicos em execucao.'
   Write-Host "  API:  http://localhost:$($script:BackendPort)/api/health"
   Write-Host '  App:  http://localhost:5173'
+  Write-Host "  Celular: use http://IP_DO_PC:5173 e a API sera chamada em http://IP_DO_PC:$($script:BackendPort)/api"
   Write-Host ''
   Write-Host 'Pressione Ctrl+C para Parar ou Reiniciar.'
 }

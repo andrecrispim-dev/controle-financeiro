@@ -39,7 +39,7 @@ export function Dashboard() {
         <span><CalendarClock size={18} /> {data.vencendoHoje} vencendo hoje</span>
         <span><CalendarClock size={18} /> {data.proximosSeteDias} nos proximos 7 dias</span>
       </section>
-      <section className="summaryGrid">
+      <section className="summaryGrid dashboardGrid">
         {cards.map(([label, value, Icon, tone]) => (
           <article className={`summaryCard ${tone}`} key={label}>
             <Icon size={22} />
