@@ -1,11 +1,12 @@
 import { NavLink } from 'react-router-dom';
-import { BarChart3, Building2, FolderTree, Home, Menu, ReceiptText, Settings, X } from 'lucide-react';
+import { BarChart3, Building2, CalendarClock, FileText, FolderTree, Home, Menu, ReceiptText, Settings, X } from 'lucide-react';
 import { useState } from 'react';
 
 const links = [
   { to: '/', label: 'Dashboard', icon: Home },
   { to: '/lancamentos', label: 'Lancamentos', icon: ReceiptText },
   { to: '/contas', label: 'Contas', icon: Building2 },
+  { to: '/faturas', label: 'Faturas', icon: FileText },
   { to: '/categorias', label: 'Categorias', icon: FolderTree },
   { to: '/relatorios', label: 'Relatorios', icon: BarChart3 },
   { to: '/configuracoes', label: 'Configuracoes', icon: Settings }

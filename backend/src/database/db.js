@@ -75,11 +75,108 @@ export function migrate(db = getDb()) {
       FOREIGN KEY (categoria_id) REFERENCES categorias(id) ON UPDATE CASCADE ON DELETE RESTRICT
     );
 
+    CREATE TABLE IF NOT EXISTS faturas_cartao (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      lancamento_id INTEGER NOT NULL UNIQUE,
+      banco TEXT NOT NULL,
+      descricao TEXT NOT NULL,
+      valor_total_centavos INTEGER NOT NULL CHECK (valor_total_centavos > 0),
+      data_vencimento TEXT NOT NULL,
+      arquivo_nome TEXT,
+      quantidade_itens INTEGER NOT NULL DEFAULT 0,
+      soma_itens_centavos INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (lancamento_id) REFERENCES lancamentos(id) ON UPDATE CASCADE ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS fatura_itens (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      fatura_id INTEGER NOT NULL,
+      categoria_id INTEGER,
+      categoria_importada TEXT,
+      data_compra TEXT NOT NULL,
+      data_original TEXT,
+      descricao TEXT NOT NULL,
+      cidade TEXT,
+      valor_centavos INTEGER NOT NULL CHECK (valor_centavos > 0),
+      tipo TEXT NOT NULL CHECK (tipo IN ('A_VISTA', 'PARCELADO')),
+      parcela TEXT,
+      cartao_titular TEXT,
+      cartao_final TEXT,
+      ambiguo INTEGER NOT NULL DEFAULT 0 CHECK (ambiguo IN (0, 1)),
+      moeda TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (fatura_id) REFERENCES faturas_cartao(id) ON UPDATE CASCADE ON DELETE CASCADE,
+      FOREIGN KEY (categoria_id) REFERENCES categorias(id) ON UPDATE CASCADE ON DELETE RESTRICT
+    );
+
+    CREATE TABLE IF NOT EXISTS plantao_valores (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      tipo TEXT NOT NULL CHECK (tipo IN ('DIURNO', 'TARDE', 'NOTURNO', 'ESPECIAL')),
+      contexto TEXT NOT NULL CHECK (contexto IN ('SEMANA', 'FIM_SEMANA_FERIADO')),
+      valor_base_centavos INTEGER NOT NULL CHECK (valor_base_centavos >= 0),
+      valor_extra_centavos INTEGER NOT NULL CHECK (valor_extra_centavos >= 0),
+      ativo INTEGER NOT NULL DEFAULT 1 CHECK (ativo IN (0, 1)),
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+      UNIQUE (tipo, contexto)
+    );
+
+    CREATE TABLE IF NOT EXISTS feriados (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      data TEXT NOT NULL UNIQUE,
+      nome TEXT NOT NULL,
+      tipo TEXT NOT NULL CHECK (tipo IN ('NACIONAL', 'ESTADUAL', 'MUNICIPAL', 'PERSONALIZADO')) DEFAULT 'PERSONALIZADO',
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS plantao_lancamentos (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      hospital TEXT NOT NULL CHECK (hospital IN ('UNIMED', 'IPIS')),
+      ano_mes TEXT NOT NULL,
+      lancamento_id INTEGER NOT NULL UNIQUE,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+      UNIQUE (hospital, ano_mes),
+      FOREIGN KEY (lancamento_id) REFERENCES lancamentos(id) ON UPDATE CASCADE ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS plantoes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      data TEXT NOT NULL,
+      hospital TEXT NOT NULL CHECK (hospital IN ('UNIMED', 'IPIS')),
+      tipo TEXT NOT NULL CHECK (tipo IN ('DIURNO', 'TARDE', 'NOTURNO', 'ESPECIAL')),
+      hora_inicio TEXT NOT NULL,
+      hora_fim TEXT NOT NULL,
+      quantidade_horas INTEGER NOT NULL,
+      quantidade_extras INTEGER NOT NULL DEFAULT 0 CHECK (quantidade_extras >= 0),
+      valor_base_centavos INTEGER NOT NULL CHECK (valor_base_centavos >= 0),
+      valor_extra_unitario_centavos INTEGER NOT NULL CHECK (valor_extra_unitario_centavos >= 0),
+      valor_extras_centavos INTEGER NOT NULL CHECK (valor_extras_centavos >= 0),
+      valor_total_centavos INTEGER NOT NULL CHECK (valor_total_centavos >= 0),
+      eh_feriado INTEGER NOT NULL DEFAULT 0 CHECK (eh_feriado IN (0, 1)),
+      eh_fim_semana INTEGER NOT NULL DEFAULT 0 CHECK (eh_fim_semana IN (0, 1)),
+      usa_valor_fim_semana INTEGER NOT NULL DEFAULT 0 CHECK (usa_valor_fim_semana IN (0, 1)),
+      observacoes TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
     CREATE INDEX IF NOT EXISTS idx_lancamentos_tipo ON lancamentos(tipo);
     CREATE INDEX IF NOT EXISTS idx_lancamentos_status ON lancamentos(status);
     CREATE INDEX IF NOT EXISTS idx_lancamentos_vencimento ON lancamentos(data_vencimento);
     CREATE INDEX IF NOT EXISTS idx_lancamentos_categoria ON lancamentos(categoria);
     CREATE INDEX IF NOT EXISTS idx_contas_bancarias_ativa ON contas_bancarias(ativa);
+    CREATE INDEX IF NOT EXISTS idx_faturas_vencimento ON faturas_cartao(data_vencimento);
+    CREATE INDEX IF NOT EXISTS idx_fatura_itens_fatura ON fatura_itens(fatura_id);
+    CREATE INDEX IF NOT EXISTS idx_fatura_itens_categoria ON fatura_itens(categoria_id);
+    CREATE INDEX IF NOT EXISTS idx_fatura_itens_data_compra ON fatura_itens(data_compra);
+    CREATE INDEX IF NOT EXISTS idx_plantoes_data ON plantoes(data);
+    CREATE INDEX IF NOT EXISTS idx_plantoes_hospital_mes ON plantoes(hospital, data);
+    CREATE INDEX IF NOT EXISTS idx_plantao_lancamentos_mes ON plantao_lancamentos(ano_mes);
   `);
 
   const contaColumns = db.prepare('PRAGMA table_info(contas_bancarias)').all().map((column) => column.name);
@@ -139,4 +236,21 @@ export function migrate(db = getDb()) {
     `).run();
   });
   txBancosDigitados();
+
+  const valoresPlantao = [
+    ['DIURNO', 'SEMANA', 69300, 4747],
+    ['TARDE', 'SEMANA', 69300, 4747],
+    ['NOTURNO', 'SEMANA', 154900, 6000],
+    ['ESPECIAL', 'SEMANA', 77450, 4747],
+    ['DIURNO', 'FIM_SEMANA_FERIADO', 85600, 6171],
+    ['TARDE', 'FIM_SEMANA_FERIADO', 85600, 6171],
+    ['NOTURNO', 'FIM_SEMANA_FERIADO', 171200, 6700],
+    ['ESPECIAL', 'FIM_SEMANA_FERIADO', 85600, 6171]
+  ];
+  const insertPlantaoValor = db.prepare(`
+    INSERT OR IGNORE INTO plantao_valores (tipo, contexto, valor_base_centavos, valor_extra_centavos)
+    VALUES (?, ?, ?, ?)
+  `);
+  const txPlantaoValores = db.transaction(() => valoresPlantao.forEach((item) => insertPlantaoValor.run(...item)));
+  txPlantaoValores();
 }
