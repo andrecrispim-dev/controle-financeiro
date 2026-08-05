@@ -7,6 +7,7 @@ const links = [
   { to: '/lancamentos', label: 'Lancamentos', icon: ReceiptText },
   { to: '/contas', label: 'Contas', icon: Building2 },
   { to: '/faturas', label: 'Faturas', icon: FileText },
+  { to: '/plantoes', label: 'Plantoes', icon: CalendarClock },
   { to: '/categorias', label: 'Categorias', icon: FolderTree },
   { to: '/relatorios', label: 'Relatorios', icon: BarChart3 },
   { to: '/configuracoes', label: 'Configuracoes', icon: Settings }

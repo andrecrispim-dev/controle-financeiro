@@ -5,6 +5,7 @@ import { Lancamentos } from './pages/Lancamentos.jsx';
 import { Categorias } from './pages/Categorias.jsx';
 import { Contas } from './pages/Contas.jsx';
 import { Faturas } from './pages/Faturas.jsx';
+import { Plantoes } from './pages/Plantoes.jsx';
 import { Relatorios } from './pages/Relatorios.jsx';
 import { Configuracoes } from './pages/Configuracoes.jsx';
 
@@ -16,6 +17,7 @@ export default function App() {
         <Route path="/lancamentos" element={<Lancamentos />} />
         <Route path="/contas" element={<Contas />} />
         <Route path="/faturas" element={<Faturas />} />
+        <Route path="/plantoes" element={<Plantoes />} />
         <Route path="/categorias" element={<Categorias />} />
         <Route path="/relatorios" element={<Relatorios />} />
         <Route path="/configuracoes" element={<Configuracoes />} />

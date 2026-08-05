@@ -17,6 +17,7 @@ import { backupRoutes } from './routes/backupRoutes.js';
 import { contaRoutes } from './routes/contaRoutes.js';
 import { bancoRoutes } from './routes/bancoRoutes.js';
 import { faturaRoutes } from './routes/faturaRoutes.js';
+import { plantaoRoutes } from './routes/plantaoRoutes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -44,6 +45,7 @@ app.use('/api/categorias', categoriaRoutes);
 app.use('/api/bancos', bancoRoutes);
 app.use('/api/contas', contaRoutes);
 app.use('/api/faturas', faturaRoutes);
+app.use('/api/plantoes', plantaoRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/relatorios', relatorioRoutes);
 app.use('/api/exportacoes', exportacaoRoutes);
