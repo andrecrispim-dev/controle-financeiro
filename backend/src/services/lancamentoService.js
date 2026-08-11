@@ -4,6 +4,7 @@ import {
   createLancamento,
   createManyLancamentos,
   deleteLancamento,
+  deleteLancamentosRecorrentes,
   getLancamentoById,
   listAllLancamentos,
   listLancamentos,
@@ -33,14 +34,19 @@ function normalizePayload(payload) {
 }
 
 function buildRecorrencias(base, recorrencia) {
-  if (!recorrencia || recorrencia.frequencia === 'NAO_REPETIR') return [base];
+  const tipoRecorrencia = recorrencia?.tipo && recorrencia.tipo !== 'NAO_REPETIR'
+    ? recorrencia.tipo
+    : (recorrencia?.frequencia && recorrencia.frequencia !== 'NAO_REPETIR' ? 'PARCELADA' : 'NAO_REPETIR');
+  if (!recorrencia || tipoRecorrencia === 'NAO_REPETIR') return [base];
+  const frequencia = tipoRecorrencia === 'FIXA' ? 'MENSAL' : (recorrencia.frequencia || 'MENSAL');
+  if (frequencia === 'NAO_REPETIR') return [base];
   const step = {
     SEMANAL: (date) => addDaysISO(date, 7),
     QUINZENAL: (date) => addDaysISO(date, 15),
     MENSAL: (date) => addMonthsISO(date, 1),
     ANUAL: (date) => addMonthsISO(date, 12)
-  }[recorrencia.frequencia];
-  const limite = recorrencia.quantidade || 12;
+  }[frequencia];
+  const limite = tipoRecorrencia === 'FIXA' ? 36 : (recorrencia.quantidade || 12);
   const final = recorrencia.dataFinal || null;
   const items = [];
   let current = base.dataVencimento;
@@ -78,9 +84,9 @@ export function editarLancamento(id, payload) {
   return updateLancamento(id, normalizePayload(payload));
 }
 
-export function excluirLancamento(id) {
-  buscarLancamento(id);
-  deleteLancamento(id);
+export function excluirLancamento(id, escopo = 'SOMENTE_ESTE') {
+  const item = buscarLancamento(id);
+  deleteLancamentosRecorrentes(item, escopo);
 }
 
 export function concluirLancamento(id, payload) {

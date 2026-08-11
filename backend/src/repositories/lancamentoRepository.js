@@ -134,6 +134,22 @@ export function deleteLancamento(id) {
   return getDb().prepare('DELETE FROM lancamentos WHERE id = ?').run(id).changes;
 }
 
+export function deleteLancamentosRecorrentes(item, escopo = 'SOMENTE_ESTE') {
+  const db = getDb();
+  if (!item.recorrenciaGrupo || escopo === 'SOMENTE_ESTE') return deleteLancamento(item.id);
+  if (escopo === 'TODOS') {
+    return db.prepare('DELETE FROM lancamentos WHERE recorrencia_grupo = ?').run(item.recorrenciaGrupo).changes;
+  }
+  if (escopo === 'PROXIMOS') {
+    return db.prepare(`
+      DELETE FROM lancamentos
+      WHERE recorrencia_grupo = ?
+        AND data_vencimento > ?
+    `).run(item.recorrenciaGrupo, item.dataVencimento).changes;
+  }
+  return deleteLancamento(item.id);
+}
+
 export function setStatus(id, status, dataPagamento = null) {
   getDb().prepare(`
     UPDATE lancamentos

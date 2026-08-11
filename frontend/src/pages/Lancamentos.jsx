@@ -29,6 +29,7 @@ function filtrosIniciais() {
 export function Lancamentos() {
   const [filters, setFilters] = useState(filtrosIniciais);
   const [modal, setModal] = useState(null);
+  const [deleteModal, setDeleteModal] = useState(null);
   const [confirm, setConfirm] = useState(null);
   const [toast, setToast] = useState(null);
   const query = useMemo(() => queryString(filters), [filters]);
@@ -57,11 +58,20 @@ export function Lancamentos() {
     list.reload();
   }
 
-  async function remove(item) {
-    await api.delete(`/lancamentos/${item.id}`);
+  async function remove(item, escopo = 'SOMENTE_ESTE') {
+    await api.deleteBody(`/lancamentos/${item.id}`, { escopo });
+    setDeleteModal(null);
     setConfirm(null);
     setToast({ message: 'Lançamento excluído com sucesso.' });
     list.reload();
+  }
+
+  function askRemove(item) {
+    if (item.recorrenciaGrupo) {
+      setDeleteModal(item);
+      return;
+    }
+    setConfirm({ title: 'Excluir lançamento', message: `Excluir definitivamente "${item.descricao}"?`, action: () => remove(item), danger: true });
   }
 
   async function concluir(item) {
@@ -125,7 +135,7 @@ export function Lancamentos() {
                         ? <button className="iconButton" onClick={() => setConfirm({ title: 'Reabrir lançamento', message: `Reabrir "${item.descricao}"?`, action: () => reabrir(item) })} aria-label="Reabrir"><RotateCcw size={17} /></button>
                         : <button className="iconButton" onClick={() => concluir(item)} aria-label={item.tipo === 'PAGAR' ? 'Marcar como pago' : 'Marcar como recebido'}><CheckCircle2 size={17} /></button>}
                       {item.status !== 'CANCELADO' && <button className="iconButton" onClick={() => setConfirm({ title: 'Cancelar lançamento', message: `Cancelar "${item.descricao}"?`, action: () => cancelar(item) })} aria-label="Cancelar"><XCircle size={17} /></button>}
-                      <button className="iconButton dangerIcon" onClick={() => setConfirm({ title: 'Excluir lançamento', message: `Excluir definitivamente "${item.descricao}"?`, action: () => remove(item), danger: true })} aria-label="Excluir"><Trash2 size={17} /></button>
+                      <button className="iconButton dangerIcon" onClick={() => askRemove(item)} aria-label="Excluir"><Trash2 size={17} /></button>
                     </td>
                   </tr>
                 ))}
@@ -153,6 +163,16 @@ export function Lancamentos() {
         </Modal>
       )}
       {confirm && <ConfirmDialog {...confirm} onClose={() => setConfirm(null)} onConfirm={confirm.action} />}
+      {deleteModal && (
+        <Modal title="Excluir recorrência" onClose={() => setDeleteModal(null)}>
+          <p className="muted">Este lançamento faz parte de uma recorrência. Escolha o que deseja excluir para "{deleteModal.descricao}".</p>
+          <div className="recurrenceActions">
+            <button className="danger" onClick={() => remove(deleteModal, 'TODOS')}>Excluir todos</button>
+            <button className="secondary" onClick={() => remove(deleteModal, 'SOMENTE_ESTE')}>Excluir apenas este</button>
+            <button className="secondary" onClick={() => remove(deleteModal, 'PROXIMOS')}>Excluir próximos</button>
+          </div>
+        </Modal>
+      )}
       <Toast toast={toast} onClose={() => setToast(null)} />
     </>
   );

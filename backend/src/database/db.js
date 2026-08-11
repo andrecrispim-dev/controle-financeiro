@@ -233,6 +233,15 @@ export function migrate(db = getDb()) {
     db.exec('CREATE INDEX IF NOT EXISTS idx_lancamentos_conta ON lancamentos(conta_id);');
   }
 
+  const plantaoColumns = db.prepare('PRAGMA table_info(plantoes)').all().map((column) => column.name);
+  if (!plantaoColumns.includes('recorrencia_grupo')) {
+    db.exec('ALTER TABLE plantoes ADD COLUMN recorrencia_grupo TEXT;');
+  }
+  if (!plantaoColumns.includes('recorrencia_tipo')) {
+    db.exec('ALTER TABLE plantoes ADD COLUMN recorrencia_tipo TEXT;');
+  }
+  db.exec('CREATE INDEX IF NOT EXISTS idx_plantoes_recorrencia ON plantoes(recorrencia_grupo, data);');
+
   const defaults = [
     ['Moradia', 'PAGAR'], ['Alimentacao', 'PAGAR'], ['Energia', 'PAGAR'],
     ['Internet', 'PAGAR'], ['Transporte', 'PAGAR'], ['Salario', 'RECEBER'],

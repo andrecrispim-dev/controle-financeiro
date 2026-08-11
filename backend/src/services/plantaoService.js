@@ -1,15 +1,18 @@
+import crypto from 'node:crypto';
 import { AppError } from '../utils/AppError.js';
-import { monthRangeISO } from '../utils/dateUtils.js';
+import { addDaysISO, addMonthsISO, monthRangeISO } from '../utils/dateUtils.js';
 import { getCategoriaById } from '../repositories/categoriaRepository.js';
 import { getContaById } from '../repositories/contaRepository.js';
 import { createLancamento } from '../repositories/lancamentoRepository.js';
 import {
   createFeriado,
+  createManyPlantoes,
   createPlantao,
   createVinculoLancamento,
   deleteFeriado,
   deleteLancamentoPlantao,
   deletePlantao,
+  deletePlantoesRecorrentes,
   existsPlantaoMesmoTurno,
   getFeriadoById,
   getPlantaoById,
@@ -19,6 +22,7 @@ import {
   listFeriados,
   listPlantaoValores,
   listPlantoes,
+  listPlantoesRecorrentesAfetados,
   listResumoMes,
   resumoHospitalMes,
   transaction,
@@ -105,6 +109,8 @@ function calculatePlantao(payload, db) {
     ehFeriado: feriado ? 1 : 0,
     ehFimSemana: fimSemana ? 1 : 0,
     usaValorFimSemana: usaFimSemana ? 1 : 0,
+    recorrenciaGrupo: payload.recorrenciaGrupo || null,
+    recorrenciaTipo: payload.recorrenciaTipo || null,
     observacoes: payload.observacoes || null
   };
 }
@@ -144,6 +150,32 @@ function syncLancamentoExistente(hospital, mes, db) {
   return getVinculoLancamento(hospital, mes, db);
 }
 
+function buildDatasRecorrencia(dataInicial, recorrencia) {
+  const frequencia = recorrencia?.frequencia || 'NAO_REPETIR';
+  if (frequencia === 'NAO_REPETIR') return [dataInicial];
+  const step = {
+    SEMANAL: (date) => addDaysISO(date, 7),
+    QUINZENAL: (date) => addDaysISO(date, 15),
+    MENSAL: (date) => addMonthsISO(date, 1)
+  }[frequencia];
+  const dataFinal = addMonthsISO(dataInicial, 36);
+  const datas = [];
+  let current = dataInicial;
+  while (current <= dataFinal) {
+    datas.push(current);
+    current = step(current);
+  }
+  return datas;
+}
+
+function syncMesesAfetados(items, db) {
+  const chaves = new Set(items.map((item) => `${item.hospital}|${mesFromDate(item.data)}`));
+  chaves.forEach((chave) => {
+    const [hospital, mes] = chave.split('|');
+    syncLancamentoExistente(hospital, mes, db);
+  });
+}
+
 export function listarPlantoes(filters) {
   const mes = filters.mes || filters.dataInicial?.slice(0, 7) || monthRangeISO().start.slice(0, 7);
   const items = listPlantoes({ ...filters, mes });
@@ -159,12 +191,24 @@ export function listarPlantoes(filters) {
 
 export function criarPlantao(payload) {
   return transaction((db) => {
-    const mes = mesFromDate(payload.data);
-    assertCanSyncConcluido(payload.hospital, mes, payload.confirmarAtualizacaoConcluido, db);
-    assertTurnoDisponivel(payload, null, db);
-    const created = createPlantao(calculatePlantao(payload, db), db);
-    syncLancamentoExistente(payload.hospital, mes, db);
-    return created;
+    const datas = buildDatasRecorrencia(payload.data, payload.recorrencia);
+    const grupo = datas.length > 1 ? crypto.randomUUID() : null;
+    const registros = datas.map((data) => ({
+      ...payload,
+      data,
+      recorrenciaGrupo: grupo,
+      recorrenciaTipo: payload.recorrencia?.frequencia || null
+    }));
+    const meses = new Set(registros.map((item) => `${item.hospital}|${mesFromDate(item.data)}`));
+    meses.forEach((chave) => {
+      const [hospital, mes] = chave.split('|');
+      assertCanSyncConcluido(hospital, mes, payload.confirmarAtualizacaoConcluido, db);
+    });
+    registros.forEach((item) => assertTurnoDisponivel(item, null, db));
+    const calculated = registros.map((item) => calculatePlantao(item, db));
+    const created = calculated.length === 1 ? [createPlantao(calculated[0], db)] : createManyPlantoes(calculated, db);
+    syncMesesAfetados(created, db);
+    return created.length === 1 ? created[0] : created;
   });
 }
 
@@ -178,7 +222,11 @@ export function editarPlantao(id, payload) {
       mesesAfetados.forEach((mes) => assertCanSyncConcluido(hospital, mes, payload.confirmarAtualizacaoConcluido, db));
     });
     assertTurnoDisponivel(payload, id, db);
-    const updated = updatePlantao(id, calculatePlantao(payload, db), db);
+    const updated = updatePlantao(id, calculatePlantao({
+      ...payload,
+      recorrenciaGrupo: current.recorrenciaGrupo,
+      recorrenciaTipo: current.recorrenciaTipo
+    }, db), db);
     hospitaisAfetados.forEach((hospital) => {
       mesesAfetados.forEach((mes) => syncLancamentoExistente(hospital, mes, db));
     });
@@ -186,14 +234,16 @@ export function editarPlantao(id, payload) {
   });
 }
 
-export function excluirPlantao(id, confirmarAtualizacaoConcluido = false) {
+export function excluirPlantao(id, options = {}) {
   return transaction((db) => {
     const current = getPlantaoById(id);
     if (!current) throw new AppError('Plantao nao encontrado.', 404);
-    const mes = mesFromDate(current.data);
-    assertCanSyncConcluido(current.hospital, mes, confirmarAtualizacaoConcluido, db);
-    deletePlantao(id, db);
-    syncLancamentoExistente(current.hospital, mes, db);
+    const escopo = options.escopo || 'SOMENTE_ESTE';
+    const afetados = listPlantoesRecorrentesAfetados(current, escopo, db);
+    afetados.forEach((item) => assertCanSyncConcluido(item.hospital, mesFromDate(item.data), options.confirmarAtualizacaoConcluido, db));
+    if (escopo === 'SOMENTE_ESTE') deletePlantao(id, db);
+    else deletePlantoesRecorrentes(current, escopo, db);
+    syncMesesAfetados(afetados, db);
   });
 }
 

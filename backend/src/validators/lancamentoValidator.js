@@ -7,9 +7,14 @@ const status = z.enum(['PENDENTE', 'CONCLUIDO', 'CANCELADO']).default('PENDENTE'
 const dateField = z.string().refine(isDateISO, 'Informe uma data valida no formato YYYY-MM-DD.');
 
 export const recorrenciaSchema = z.object({
+  tipo: z.enum(['NAO_REPETIR', 'PARCELADA', 'FIXA']).default('NAO_REPETIR'),
   frequencia: z.enum(['NAO_REPETIR', 'SEMANAL', 'QUINZENAL', 'MENSAL', 'ANUAL']).default('NAO_REPETIR'),
   quantidade: z.coerce.number().int().min(1).max(120).optional(),
   dataFinal: z.string().refine(isDateISO, 'Informe uma data final valida.').optional().or(z.literal(''))
+}).optional();
+
+export const excluirLancamentoSchema = z.object({
+  escopo: z.enum(['SOMENTE_ESTE', 'TODOS', 'PROXIMOS']).default('SOMENTE_ESTE')
 }).optional();
 
 export const lancamentoCreateSchema = z.object({

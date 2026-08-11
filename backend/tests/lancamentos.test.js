@@ -60,6 +60,29 @@ describe('lancamentos', () => {
     expect(res.body.data[2].dataPagamento).toBeNull();
   });
 
+  it('cria recorrencia fixa por tres anos e exclui proximos lancamentos da serie', async () => {
+    const res = await request(app).post('/api/lancamentos').send({
+      tipo: 'RECEBER',
+      descricao: 'Salario fixo',
+      categoria: 'Salario',
+      valor: 5000,
+      dataVencimento: '2026-08-01',
+      status: 'PENDENTE',
+      recorrencia: { tipo: 'FIXA' }
+    });
+
+    expect(res.status).toBe(201);
+    expect(res.body.data).toHaveLength(36);
+    expect(res.body.data[0].recorrenciaGrupo).toBeTruthy();
+
+    const alvo = res.body.data[1];
+    const del = await request(app).delete(`/api/lancamentos/${alvo.id}`).send({ escopo: 'PROXIMOS' });
+    expect(del.status).toBe(200);
+
+    const list = await request(app).get('/api/lancamentos?dataInicial=2026-08-01&dataFinal=2029-12-31&limite=100');
+    expect(list.body.meta.total).toBe(2);
+  });
+
   it('valida valor maior que zero', async () => {
     const res = await request(app).post('/api/lancamentos').send({
       tipo: 'PAGAR',

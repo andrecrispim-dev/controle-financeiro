@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CheckCircle2, Edit, PiggyBank, Plus, Trash2 } from 'lucide-react';
+import { CheckCircle2, Edit, Eye, PiggyBank, Plus, Trash2 } from 'lucide-react';
 import { api } from '../services/api.js';
 import { useApi } from '../hooks/useApi.js';
 import { PageHeader } from '../components/PageHeader.jsx';
@@ -7,7 +7,7 @@ import { Loading } from '../components/Loading.jsx';
 import { Modal } from '../components/Modal.jsx';
 import { ConfirmDialog } from '../components/ConfirmDialog.jsx';
 import { Toast } from '../components/Toast.jsx';
-import { formatDate, formatMoneyFromCentavos, todayISO } from '../utils/formatters.js';
+import { formatDate, formatDateTime, formatMoneyFromCentavos, todayISO } from '../utils/formatters.js';
 
 const emptyMeta = { nome: '', valorAlvo: '', valorAtual: '0', dataAlvo: '', contaId: '', observacoes: '' };
 
@@ -28,6 +28,9 @@ export function Metas() {
   const contas = useApi(() => api.get('/contas?ativas=true'));
   const [modal, setModal] = useState(null);
   const [aporteModal, setAporteModal] = useState(null);
+  const [expandedMetaId, setExpandedMetaId] = useState(null);
+  const [aportesByMeta, setAportesByMeta] = useState({});
+  const [loadingAportes, setLoadingAportes] = useState(null);
   const [confirm, setConfirm] = useState(null);
   const [toast, setToast] = useState(null);
 
@@ -71,9 +74,31 @@ export function Metas() {
       });
       setAporteModal(null);
       setToast({ message: 'Aporte registrado com sucesso.' });
+      if (expandedMetaId === aporteModal.id) {
+        const response = await api.get(`/metas/${aporteModal.id}/aportes`);
+        setAportesByMeta((current) => ({ ...current, [aporteModal.id]: response.data }));
+      }
       list.reload();
     } catch (err) {
       setToast({ type: 'error', message: err.message });
+    }
+  }
+
+  async function toggleAportes(meta) {
+    if (expandedMetaId === meta.id) {
+      setExpandedMetaId(null);
+      return;
+    }
+    setExpandedMetaId(meta.id);
+    if (aportesByMeta[meta.id]) return;
+    setLoadingAportes(meta.id);
+    try {
+      const response = await api.get(`/metas/${meta.id}/aportes`);
+      setAportesByMeta((current) => ({ ...current, [meta.id]: response.data }));
+    } catch (err) {
+      setToast({ type: 'error', message: err.message });
+    } finally {
+      setLoadingAportes(null);
     }
   }
 
@@ -133,9 +158,36 @@ export function Metas() {
                 </div>
                 <div className="actions">
                   <button className="secondary" onClick={() => setAporteModal(meta)} disabled={meta.status !== 'EM_ANDAMENTO'}><PiggyBank size={17} /> Aporte</button>
+                  <button className="iconButton" onClick={() => toggleAportes(meta)} aria-label="Visualizar aportes"><Eye size={17} /></button>
                   <button className="iconButton" onClick={() => setModal({ ...meta, valorAlvo: String(meta.valorAlvoCentavos / 100), contaId: meta.contaId || '' })} aria-label="Editar"><Edit size={17} /></button>
                   <button className="iconButton dangerIcon" onClick={() => setConfirm({ item: meta })} aria-label="Excluir"><Trash2 size={17} /></button>
                 </div>
+                {expandedMetaId === meta.id && (
+                  <div className="aporteList">
+                    <div className="aporteListHeader">
+                      <strong>Aportes registrados</strong>
+                      <span>{(aportesByMeta[meta.id] || []).length} aporte(s)</span>
+                    </div>
+                    {loadingAportes === meta.id ? (
+                      <div className="emptyState compact">Carregando aportes...</div>
+                    ) : (aportesByMeta[meta.id] || []).length === 0 ? (
+                      <div className="emptyState compact">Nenhum aporte registrado para esta meta.</div>
+                    ) : (
+                      <div className="aporteRows">
+                        {aportesByMeta[meta.id].map((aporte) => (
+                          <article key={aporte.id} className="aporteRow">
+                            <div>
+                              <strong>{formatMoneyFromCentavos(aporte.valorCentavos)}</strong>
+                              <span>Data do aporte: {formatDate(aporte.data)}</span>
+                              <span>Registrado em: {formatDateTime(aporte.createdAt)}</span>
+                              {aporte.observacoes && <small>{aporte.observacoes}</small>}
+                            </div>
+                          </article>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </article>
             ))}
           </section>

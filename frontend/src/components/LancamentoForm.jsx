@@ -11,7 +11,7 @@ const initial = {
   dataPagamento: '',
   status: 'PENDENTE',
   observacoes: '',
-  recorrencia: { frequencia: 'NAO_REPETIR', quantidade: 1, dataFinal: '' }
+  recorrencia: { tipo: 'NAO_REPETIR', frequencia: 'MENSAL', quantidade: 1, dataFinal: '' }
 };
 
 export function LancamentoForm({ lancamento, categorias, contas = [], onSubmit, onCancel, readOnly = false, onEdit }) {
@@ -33,7 +33,7 @@ export function LancamentoForm({ lancamento, categorias, contas = [], onSubmit, 
         dataPagamento: lancamento.dataPagamento || '',
         status: lancamento.status,
         observacoes: lancamento.observacoes || '',
-        recorrencia: { frequencia: 'NAO_REPETIR', quantidade: 1, dataFinal: '' }
+        recorrencia: { tipo: 'NAO_REPETIR', frequencia: 'MENSAL', quantidade: 1, dataFinal: '' }
       });
     }
   }, [lancamento]);
@@ -114,18 +114,22 @@ export function LancamentoForm({ lancamento, categorias, contas = [], onSubmit, 
       {!editing && (
         <>
           <label>Recorrência
-            <select value={form.recorrencia.frequencia} onChange={(e) => setForm((c) => ({ ...c, recorrencia: { ...c.recorrencia, frequencia: e.target.value } }))}>
+            <select value={form.recorrencia.tipo} onChange={(e) => setForm((c) => ({ ...c, recorrencia: { ...c.recorrencia, tipo: e.target.value, frequencia: 'MENSAL' } }))}>
               <option value="NAO_REPETIR">Não repetir</option>
-              <option value="SEMANAL">Semanal</option>
-              <option value="QUINZENAL">Quinzenal</option>
-              <option value="MENSAL">Mensal</option>
-              <option value="ANUAL">Anual</option>
+              <option value="PARCELADA">Parcelada</option>
+              <option value="FIXA">Fixa mensal</option>
             </select>
           </label>
-          {form.recorrencia.frequencia !== 'NAO_REPETIR' && (
-            <label>Quantidade
+          {form.recorrencia.tipo === 'PARCELADA' && (
+            <label>Quantidade de parcelas
               <input type="number" min="1" max="120" value={form.recorrencia.quantidade} onChange={(e) => setForm((c) => ({ ...c, recorrencia: { ...c.recorrencia, quantidade: Number(e.target.value) } }))} />
             </label>
+          )}
+          {form.recorrencia.tipo === 'FIXA' && (
+            <div className="launchPreview full">
+              <span>Recorrência fixa</span>
+              <small>Serão criados lançamentos mensais por 3 anos a partir do vencimento informado.</small>
+            </div>
           )}
         </>
       )}

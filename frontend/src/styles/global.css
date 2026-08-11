@@ -9,9 +9,9 @@
   --primary: #d4af37;
   --primary-strong: #f1d178;
   --accent: #d4af37;
-  --success: #2dd4bf;
+  --success: #8a9a5b;
   --warning: #d4af37;
-  --receive: #2dd4bf;
+  --receive: #8a9a5b;
   --pay: #ef4444;
   --warn: #d4af37;
   --danger: #ef4444;
@@ -29,9 +29,9 @@
   --primary: #a77f22;
   --primary-strong: #7a5a16;
   --accent: #a77f22;
-  --success: #047857;
+  --success: #556b2f;
   --warning: #a77f22;
-  --receive: #047857;
+  --receive: #556b2f;
   --pay: #b91c1c;
   --warn: #a77f22;
   --danger: #b91c1c;
@@ -628,6 +628,16 @@ th { color: var(--muted); font-size: 0.82rem; text-transform: uppercase; }
   gap: 1rem;
   margin: 1rem 0;
 }
+.plantaoLayout {
+  display: flex;
+  flex-direction: column;
+}
+.plantaoLayout .plantaoCalendar {
+  order: 1;
+}
+.plantaoLayout .hospitalGrid {
+  order: 2;
+}
 .hospitalCard {
   display: flex;
   justify-content: space-between;
@@ -899,6 +909,49 @@ th { color: var(--muted); font-size: 0.82rem; text-transform: uppercase; }
   font-weight: 400;
   font-size: 0.85rem;
 }
+.aporteList {
+  border-top: 1px solid var(--border);
+  padding-top: 0.75rem;
+  display: grid;
+  gap: 0.65rem;
+}
+.aporteListHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.aporteListHeader span {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+.aporteRows {
+  display: grid;
+  gap: 0.55rem;
+}
+.aporteRow {
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface-2) 76%, var(--surface));
+  border-radius: 8px;
+  padding: 0.7rem;
+}
+.aporteRow strong,
+.aporteRow span,
+.aporteRow small {
+  display: block;
+}
+.aporteRow strong {
+  color: var(--receive);
+  margin-bottom: 0.25rem;
+}
+.aporteRow span,
+.aporteRow small {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+.aporteRow small {
+  margin-top: 0.3rem;
+}
 .valueCard strong,
 .launchPreview strong {
   color: var(--accent);
@@ -911,6 +964,12 @@ th { color: var(--muted); font-size: 0.82rem; text-transform: uppercase; }
   padding: 0.85rem;
   display: grid;
   gap: 0.25rem;
+}
+.recurrenceActions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.65rem;
+  margin-top: 1rem;
 }
 .positiveText { color: var(--receive); font-weight: 700; }
 .negativeText { color: var(--pay); font-weight: 700; }

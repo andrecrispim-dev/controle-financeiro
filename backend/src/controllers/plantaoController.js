@@ -15,6 +15,7 @@ import {
 import {
   feriadoCreateSchema,
   feriadoUpdateSchema,
+  excluirPlantaoSchema,
   lancarPlantoesSchema,
   plantaoCreateSchema,
   plantaoFiltersSchema,
@@ -38,7 +39,8 @@ export function update(req, res) {
 }
 
 export function destroy(req, res) {
-  excluirPlantao(Number(req.params.id), req.body?.confirmarAtualizacaoConcluido === true);
+  const data = excluirPlantaoSchema.parse(req.body || {});
+  excluirPlantao(Number(req.params.id), data || {});
   successResponse(res, { message: 'Plantao excluido com sucesso.' });
 }
 

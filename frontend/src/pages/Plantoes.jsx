@@ -24,6 +24,7 @@ const emptyPlantao = (data) => ({
   hospital: 'UNIMED',
   tipo: 'DIURNO',
   quantidadeExtras: 0,
+  recorrencia: { frequencia: 'NAO_REPETIR' },
   observacoes: ''
 });
 
@@ -57,6 +58,7 @@ export function Plantoes() {
   const [periodo, setPeriodo] = useState(monthRangeISO(todayISO()));
   const [dayModal, setDayModal] = useState(null);
   const [plantaoModal, setPlantaoModal] = useState(null);
+  const [deleteModal, setDeleteModal] = useState(null);
   const [lancarModal, setLancarModal] = useState(null);
   const [valoresOpen, setValoresOpen] = useState(false);
   const [valorModal, setValorModal] = useState(null);
@@ -123,6 +125,7 @@ export function Plantoes() {
       hospital: form.get('hospital'),
       tipo: form.get('tipo'),
       quantidadeExtras: Number(form.get('quantidadeExtras') || 0),
+      recorrencia: plantaoModal.id ? undefined : { frequencia: form.get('recorrencia') || 'NAO_REPETIR' },
       observacoes: form.get('observacoes') || null
     };
     const submit = async (confirmarAtualizacaoConcluido) => {
@@ -136,9 +139,10 @@ export function Plantoes() {
     await runWithConcluidoConfirm(submit, submit);
   }
 
-  async function removePlantao(item, confirmarAtualizacaoConcluido = false) {
+  async function removePlantao(item, escopo = 'SOMENTE_ESTE', confirmarAtualizacaoConcluido = false) {
     try {
-      await api.deleteBody(`/plantoes/${item.id}`, { confirmarAtualizacaoConcluido });
+      await api.deleteBody(`/plantoes/${item.id}`, { escopo, confirmarAtualizacaoConcluido });
+      setDeleteModal(null);
       setConfirm(null);
       setToast({ message: 'Plantão excluído com sucesso.' });
       plantoesApi.reload();
@@ -149,13 +153,22 @@ export function Plantoes() {
           message: 'O lançamento financeiro deste hospital/mês já está concluído. Deseja excluir o plantão e atualizar mesmo assim?',
           confirmLabel: 'Excluir e atualizar',
           danger: true,
-          onConfirm: () => removePlantao(item, true)
+          onConfirm: () => removePlantao(item, escopo, true)
         });
         return;
       }
       setToast({ type: 'error', message: err.message });
       setConfirm(null);
     }
+  }
+
+  function askRemovePlantao(item) {
+    if (item.recorrenciaGrupo) {
+      setDeleteModal(item);
+      return;
+    }
+    const Info = tipoInfo(item.tipo);
+    setConfirm({ title: 'Excluir plantão', message: `Excluir plantão ${Info.label} de ${item.hospital}?`, danger: true, confirmLabel: 'Excluir', onConfirm: () => removePlantao(item) });
   }
 
   async function lancar(event) {
@@ -210,7 +223,7 @@ export function Plantoes() {
       <MonthNavigator value={periodo.start} onChange={setPeriodo} />
 
       {plantoesApi.loading ? <Loading /> : (
-        <>
+        <div className="plantaoLayout">
           <section className="hospitalGrid">
             {resumo.map((item) => (
               <article key={item.hospital} className="panel hospitalCard">
@@ -289,7 +302,7 @@ export function Plantoes() {
             </div>
           </section>
 
-        </>
+        </div>
       )}
 
       {dayModal && (
@@ -308,7 +321,7 @@ export function Plantoes() {
                   <strong>{formatMoneyFromCentavos(item.valorTotalCentavos)}</strong>
                   <div className="actions">
                     <button className="iconButton" onClick={() => setPlantaoModal(item)} aria-label="Editar"><Edit size={17} /></button>
-                    <button className="iconButton dangerIcon" onClick={() => setConfirm({ title: 'Excluir plantão', message: `Excluir plantão ${Info.label} de ${item.hospital}?`, danger: true, confirmLabel: 'Excluir', onConfirm: () => removePlantao(item) })} aria-label="Excluir"><Trash2 size={17} /></button>
+                    <button className="iconButton dangerIcon" onClick={() => askRemovePlantao(item)} aria-label="Excluir"><Trash2 size={17} /></button>
                   </div>
                 </article>
               );
@@ -335,6 +348,16 @@ export function Plantoes() {
               </select>
             </label>
             <label>Pacientes extras<input type="number" name="quantidadeExtras" min="0" max="999" defaultValue={plantaoModal.quantidadeExtras || 0} /></label>
+            {!plantaoModal.id && (
+              <label>Recorrência
+                <select name="recorrencia" defaultValue={plantaoModal.recorrencia?.frequencia || 'NAO_REPETIR'}>
+                  <option value="NAO_REPETIR">Não repetir</option>
+                  <option value="SEMANAL">Semanal</option>
+                  <option value="QUINZENAL">Quinzenal</option>
+                  <option value="MENSAL">Mensal</option>
+                </select>
+              </label>
+            )}
             <label className="full">Observações<textarea name="observacoes" rows={3} maxLength={1000} defaultValue={plantaoModal.observacoes || ''} /></label>
             <div className="modalActions full">
               <button type="button" className="secondary" onClick={() => setPlantaoModal(null)}>Cancelar</button>
@@ -409,6 +432,16 @@ export function Plantoes() {
               <button className="primary">Salvar valor</button>
             </div>
           </form>
+        </Modal>
+      )}
+
+      {deleteModal && (
+        <Modal title="Excluir recorrência de plantões" onClose={() => setDeleteModal(null)}>
+          <p className="muted">Este plantão faz parte de uma recorrência. Você pode apagar apenas o registro visualizado ou apagar a série deste mês em diante. Meses já lançados no financeiro serão preservados.</p>
+          <div className="recurrenceActions">
+            <button className="secondary" onClick={() => removePlantao(deleteModal, 'SOMENTE_ESTE')}>Excluir apenas este</button>
+            <button className="danger" onClick={() => removePlantao(deleteModal, 'TODOS_SEGUINTES')}>Excluir deste mês em diante</button>
+          </div>
         </Modal>
       )}
 

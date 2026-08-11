@@ -20,10 +20,20 @@ export const plantaoCreateSchema = z.object({
   tipo: tipoPlantao,
   quantidadeExtras: z.coerce.number().int().min(0).max(999).default(0),
   observacoes: z.string().trim().max(1000).optional().nullable(),
+  recorrencia: z.object({
+    frequencia: z.enum(['NAO_REPETIR', 'SEMANAL', 'QUINZENAL', 'MENSAL']).default('NAO_REPETIR')
+  }).optional(),
   confirmarAtualizacaoConcluido: z.boolean().optional()
 });
 
-export const plantaoUpdateSchema = plantaoCreateSchema;
+export const plantaoUpdateSchema = plantaoCreateSchema.extend({
+  recorrencia: z.undefined().optional()
+});
+
+export const excluirPlantaoSchema = z.object({
+  escopo: z.enum(['SOMENTE_ESTE', 'TODOS_SEGUINTES']).default('SOMENTE_ESTE'),
+  confirmarAtualizacaoConcluido: z.boolean().optional()
+}).optional();
 
 export const lancarPlantoesSchema = z.object({
   mes: z.string().regex(/^\d{4}-\d{2}$/, 'Informe o mes no formato YYYY-MM.'),

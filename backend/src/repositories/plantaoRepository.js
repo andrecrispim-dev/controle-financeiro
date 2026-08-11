@@ -18,6 +18,8 @@ function mapPlantao(row) {
     ehFeriado: Boolean(row.eh_feriado),
     ehFimSemana: Boolean(row.eh_fim_semana),
     usaValorFimSemana: Boolean(row.usa_valor_fim_semana),
+    recorrenciaGrupo: row.recorrencia_grupo,
+    recorrenciaTipo: row.recorrencia_tipo,
     observacoes: row.observacoes,
     createdAt: row.created_at,
     updatedAt: row.updated_at
@@ -121,14 +123,18 @@ export function createPlantao(data, db = getDb()) {
     INSERT INTO plantoes (
       data, hospital, tipo, hora_inicio, hora_fim, quantidade_horas, quantidade_extras,
       valor_base_centavos, valor_extra_unitario_centavos, valor_extras_centavos, valor_total_centavos,
-      eh_feriado, eh_fim_semana, usa_valor_fim_semana, observacoes
+      eh_feriado, eh_fim_semana, usa_valor_fim_semana, recorrencia_grupo, recorrencia_tipo, observacoes
     ) VALUES (
       @data, @hospital, @tipo, @horaInicio, @horaFim, @quantidadeHoras, @quantidadeExtras,
       @valorBaseCentavos, @valorExtraUnitarioCentavos, @valorExtrasCentavos, @valorTotalCentavos,
-      @ehFeriado, @ehFimSemana, @usaValorFimSemana, @observacoes
+      @ehFeriado, @ehFimSemana, @usaValorFimSemana, @recorrenciaGrupo, @recorrenciaTipo, @observacoes
     )
   `).run(data);
   return getPlantaoById(result.lastInsertRowid);
+}
+
+export function createManyPlantoes(items, db = getDb()) {
+  return items.map((item) => createPlantao(item, db));
 }
 
 export function updatePlantao(id, data, db = getDb()) {
@@ -148,6 +154,8 @@ export function updatePlantao(id, data, db = getDb()) {
         eh_feriado = @ehFeriado,
         eh_fim_semana = @ehFimSemana,
         usa_valor_fim_semana = @usaValorFimSemana,
+        recorrencia_grupo = @recorrenciaGrupo,
+        recorrencia_tipo = @recorrenciaTipo,
         observacoes = @observacoes,
         updated_at = datetime('now')
     WHERE id = @id
@@ -157,6 +165,39 @@ export function updatePlantao(id, data, db = getDb()) {
 
 export function deletePlantao(id, db = getDb()) {
   return db.prepare('DELETE FROM plantoes WHERE id = ?').run(id).changes;
+}
+
+export function deletePlantoesRecorrentes(item, escopo = 'SOMENTE_ESTE', db = getDb()) {
+  if (!item.recorrenciaGrupo || escopo === 'SOMENTE_ESTE') return deletePlantao(item.id, db);
+  return db.prepare(`
+    DELETE FROM plantoes
+    WHERE recorrencia_grupo = @grupo
+      AND data >= @inicioMes
+      AND NOT EXISTS (
+        SELECT 1
+        FROM plantao_lancamentos pl
+        JOIN lancamentos l ON l.id = pl.lancamento_id
+        WHERE pl.hospital = plantoes.hospital
+          AND pl.ano_mes = substr(plantoes.data, 1, 7)
+      )
+  `).run({ grupo: item.recorrenciaGrupo, inicioMes: escopo === 'TODOS_SEGUINTES' ? `${item.data.slice(0, 7)}-01` : item.data }).changes;
+}
+
+export function listPlantoesRecorrentesAfetados(item, escopo = 'SOMENTE_ESTE', db = getDb()) {
+  if (!item.recorrenciaGrupo || escopo === 'SOMENTE_ESTE') return [item];
+  return db.prepare(`
+    SELECT *
+    FROM plantoes
+    WHERE recorrencia_grupo = @grupo
+      AND data >= @inicioMes
+      AND NOT EXISTS (
+        SELECT 1
+        FROM plantao_lancamentos pl
+        JOIN lancamentos l ON l.id = pl.lancamento_id
+        WHERE pl.hospital = plantoes.hospital
+          AND pl.ano_mes = substr(plantoes.data, 1, 7)
+      )
+  `).all({ grupo: item.recorrenciaGrupo, inicioMes: `${item.data.slice(0, 7)}-01` }).map(mapPlantao);
 }
 
 export function getPlantaoValor(tipo, contexto, db = getDb()) {

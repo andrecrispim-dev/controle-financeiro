@@ -85,4 +85,27 @@ describe('plantoes', () => {
     expect(duplicate.status).toBe(409);
     expect(duplicate.body.message).toBe('Ja existe um plantao deste turno cadastrado neste dia.');
   });
+
+  it('cria plantoes recorrentes e exclui a serie do mes em diante', async () => {
+    const created = await request(app).post('/api/plantoes').send({
+      data: '2026-08-03',
+      hospital: 'UNIMED',
+      tipo: 'DIURNO',
+      quantidadeExtras: 0,
+      recorrencia: { frequencia: 'SEMANAL' }
+    });
+
+    expect(created.status).toBe(201);
+    expect(created.body.data.length).toBeGreaterThan(150);
+    expect(created.body.data[0].recorrenciaGrupo).toBeTruthy();
+
+    const agosto = await request(app).get('/api/plantoes?mes=2026-08');
+    expect(agosto.body.data.items.length).toBe(5);
+
+    const del = await request(app).delete(`/api/plantoes/${created.body.data[0].id}`).send({ escopo: 'TODOS_SEGUINTES' });
+    expect(del.status).toBe(200);
+
+    const after = await request(app).get('/api/plantoes?mes=2026-08');
+    expect(after.body.data.items.length).toBe(0);
+  });
 });

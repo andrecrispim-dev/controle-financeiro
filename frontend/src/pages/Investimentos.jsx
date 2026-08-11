@@ -10,7 +10,7 @@ import { ConfirmDialog } from '../components/ConfirmDialog.jsx';
 import { Toast } from '../components/Toast.jsx';
 import { formatDate, formatMoneyFromCentavos } from '../utils/formatters.js';
 
-const colors = ['#d4af37', '#2dd4bf', '#ef4444', '#f1d178', '#8b7355', '#f2ede5'];
+const colors = ['#d4af37', '#8a9a5b', '#ef4444', '#f1d178', '#8b7355', '#f2ede5'];
 
 const classes = [
   { value: 'RENDA_FIXA', label: 'Renda Fixa' },

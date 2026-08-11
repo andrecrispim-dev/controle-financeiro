@@ -10,6 +10,18 @@ export function formatDate(dateISO) {
   return `${day}/${month}/${year}`;
 }
 
+export function formatDateTime(value) {
+  if (!value) return '-';
+  const normalized = String(value).replace(' ', 'T');
+  const date = new Date(normalized.endsWith('Z') ? normalized : `${normalized}Z`);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat('pt-BR', {
+    dateStyle: 'short',
+    timeStyle: 'short',
+    timeZone: 'America/Sao_Paulo'
+  }).format(date);
+}
+
 export function todayISO() {
   return new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' });
 }

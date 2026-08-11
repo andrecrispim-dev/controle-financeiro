@@ -9,7 +9,7 @@ import {
   listarLancamentos,
   reabrirLancamento
 } from '../services/lancamentoService.js';
-import { concluirSchema, filtrosLancamentosSchema, lancamentoCreateSchema, lancamentoUpdateSchema } from '../validators/lancamentoValidator.js';
+import { concluirSchema, excluirLancamentoSchema, filtrosLancamentosSchema, lancamentoCreateSchema, lancamentoUpdateSchema } from '../validators/lancamentoValidator.js';
 
 export function index(req, res) {
   const filters = filtrosLancamentosSchema.parse(req.query);
@@ -37,7 +37,8 @@ export function update(req, res) {
 }
 
 export function destroy(req, res) {
-  excluirLancamento(Number(req.params.id));
+  const data = excluirLancamentoSchema.parse(req.body || {});
+  excluirLancamento(Number(req.params.id), data?.escopo);
   successResponse(res, { message: 'Lancamento excluido com sucesso.' });
 }
 

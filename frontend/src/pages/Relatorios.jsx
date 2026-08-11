@@ -7,7 +7,7 @@ import { formatDate, formatMoneyFromCentavos, monthLabel, monthRangeISO, querySt
 import { PageHeader } from '../components/PageHeader.jsx';
 import { Loading } from '../components/Loading.jsx';
 
-const colors = ['#d4af37', '#2dd4bf', '#ef4444', '#f1d178', '#8b7355', '#f2ede5', '#b98b25', '#7a5a16'];
+const colors = ['#d4af37', '#8a9a5b', '#ef4444', '#f1d178', '#8b7355', '#f2ede5', '#b98b25', '#7a5a16'];
 const chartReports = ['GRAFICO_COMPARATIVO', 'GRAFICO_CATEGORIA', 'GRAFICO_MENSAL'];
 const reportsWithExport = ['CONSOLIDADO', 'PAGAR', 'RECEBER'];
 
