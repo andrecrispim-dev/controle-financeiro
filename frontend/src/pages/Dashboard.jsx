@@ -23,21 +23,21 @@ export function Dashboard() {
     ['A pagar pendente', data.totalPagarPendente, TrendingDown, 'pagar'],
     ['Saldo projetado', data.saldoProjetado, Wallet, 'info'],
     ['Total nas contas', data.totalContas, Building2, 'info'],
-    ['Ja recebido', data.totalRecebido, CheckCircle2, 'receber'],
-    ['Ja pago', data.totalPago, CheckCircle2, 'pagar']
+    ['Já recebido', data.totalRecebido, CheckCircle2, 'receber'],
+    ['Já pago', data.totalPago, CheckCircle2, 'pagar']
   ];
 
   return (
     <>
       <PageHeader
         title="Dashboard"
-        subtitle={`Resumo do periodo (${formatDate(data.periodo.dataInicial)} a ${formatDate(data.periodo.dataFinal)}).`}
+        subtitle={`Resumo do período (${formatDate(data.periodo.dataInicial)} a ${formatDate(data.periodo.dataFinal)}).`}
       />
       <MonthNavigator value={periodo.start} onChange={setPeriodo} />
       <section className="alertStrip">
         <span><AlertTriangle size={18} /> {data.vencidas} vencidas</span>
         <span><CalendarClock size={18} /> {data.vencendoHoje} vencendo hoje</span>
-        <span><CalendarClock size={18} /> {data.proximosSeteDias} nos proximos 7 dias</span>
+        <span><CalendarClock size={18} /> {data.proximosSeteDias} nos próximos 7 dias</span>
       </section>
       <section className="summaryGrid dashboardGrid">
         {cards.map(([label, value, Icon, tone]) => (
@@ -50,7 +50,7 @@ export function Dashboard() {
       </section>
       <section className="panel">
         <div className="sectionTitle">
-          <h2>Proximos vencimentos do periodo</h2>
+          <h2>Próximos vencimentos do período</h2>
         </div>
         {proximos.loading ? <Loading /> : (
           <div className="listStack">

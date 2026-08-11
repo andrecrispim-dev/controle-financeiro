@@ -32,7 +32,7 @@ export function Categorias() {
   async function remove(item) {
     try {
       await api.delete(`/categorias/${item.id}`);
-      setToast({ message: 'Categoria excluida com sucesso.' });
+      setToast({ message: 'Categoria excluída com sucesso.' });
       list.reload();
     } catch (err) {
       setToast({ type: 'error', message: err.message });
@@ -51,17 +51,17 @@ export function Categorias() {
 
   return (
     <>
-      <PageHeader title="Categorias" subtitle="Organize entradas e saidas por grupos."
+      <PageHeader title="Categorias" subtitle="Organize entradas e saídas por grupos."
         action={<button className="primary" onClick={() => setModal({ nome: '', tipo: 'AMBOS' })}><Plus size={18} /> Adicionar</button>} />
       {list.loading ? <Loading /> : (
         <section className="panel tablePanel">
           <table>
-            <thead><tr><th>Nome</th><th>Tipo</th><th>Acoes</th></tr></thead>
+            <thead><tr><th>Nome</th><th>Tipo</th><th>Ações</th></tr></thead>
             <tbody>{(list.data?.data || []).map((item) => (
               <tr key={item.id}>
                 <td data-label="Nome" className="mobileTitle">{item.nome}</td>
                 <td data-label="Tipo"><span className={`badge ${tipoBadgeClass(item.tipo)}`}>{item.tipo}</span></td>
-                <td data-label="Acoes" className="actions">
+                <td data-label="Ações" className="actions">
                   <button className="iconButton" onClick={() => setModal(item)} aria-label="Editar"><Edit size={17} /></button>
                   <button className="iconButton dangerIcon" onClick={() => setConfirm({ item })} aria-label="Excluir"><Trash2 size={17} /></button>
                 </td>
@@ -79,7 +79,7 @@ export function Categorias() {
           </form>
         </Modal>
       )}
-      {confirm && <ConfirmDialog danger title="Excluir categoria" message={`Excluir "${confirm.item.nome}"? Categorias em uso serao bloqueadas pela API.`} onClose={() => setConfirm(null)} onConfirm={() => remove(confirm.item)} confirmLabel="Excluir" />}
+      {confirm && <ConfirmDialog danger title="Excluir categoria" message={`Excluir "${confirm.item.nome}"? Categorias em uso serão bloqueadas pela API.`} onClose={() => setConfirm(null)} onConfirm={() => remove(confirm.item)} confirmLabel="Excluir" />}
       <Toast toast={toast} onClose={() => setToast(null)} />
     </>
   );

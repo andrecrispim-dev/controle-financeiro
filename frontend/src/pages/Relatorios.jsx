@@ -7,7 +7,7 @@ import { formatDate, formatMoneyFromCentavos, monthLabel, monthRangeISO, querySt
 import { PageHeader } from '../components/PageHeader.jsx';
 import { Loading } from '../components/Loading.jsx';
 
-const colors = ['#2563eb', '#16a34a', '#dc2626', '#f59e0b', '#64748b', '#0891b2', '#e6007e', '#7c5cff'];
+const colors = ['#d4af37', '#2dd4bf', '#ef4444', '#f1d178', '#8b7355', '#f2ede5', '#b98b25', '#7a5a16'];
 const chartReports = ['GRAFICO_COMPARATIVO', 'GRAFICO_CATEGORIA', 'GRAFICO_MENSAL'];
 const reportsWithExport = ['CONSOLIDADO', 'PAGAR', 'RECEBER'];
 
@@ -33,10 +33,10 @@ function monthToRange(month) {
 function tituloRelatorio(relatorio) {
   if (relatorio === 'PAGAR') return 'Contas a pagar';
   if (relatorio === 'RECEBER') return 'Contas a receber';
-  if (relatorio === 'CARTAO_CATEGORIA') return 'Gastos no cartao - Categorias';
-  if (relatorio === 'GRAFICO_COMPARATIVO') return 'Grafico previsto x realizado';
-  if (relatorio === 'GRAFICO_CATEGORIA') return 'Grafico por categoria';
-  if (relatorio === 'GRAFICO_MENSAL') return 'Grafico de saldo realizado';
+  if (relatorio === 'CARTAO_CATEGORIA') return 'Gastos no cartão - Categorias';
+  if (relatorio === 'GRAFICO_COMPARATIVO') return 'Gráfico previsto x realizado';
+  if (relatorio === 'GRAFICO_CATEGORIA') return 'Gráfico por categoria';
+  if (relatorio === 'GRAFICO_MENSAL') return 'Gráfico de saldo realizado';
   return 'Consolidado de contas';
 }
 
@@ -215,29 +215,29 @@ export function Relatorios() {
 
   return (
     <>
-      <PageHeader title="Relatorios" subtitle="Escolha o relatorio, aplique os filtros correspondentes e execute." />
+      <PageHeader title="Relatórios" subtitle="Escolha o relatório, aplique os filtros correspondentes e execute." />
       <section className={`filters panel reportFilters smartReportFilters ${filters.relatorio === 'CARTAO_CATEGORIA' ? 'cardReportFilters' : ''}`}>
-        <label>Relatorio
+        <label>Relatório
           <select value={filters.relatorio} onChange={(e) => changeReport(e.target.value)}>
             <option value="CONSOLIDADO">Consolidado</option>
             <option value="PAGAR">Contas a pagar</option>
             <option value="RECEBER">Contas a receber</option>
-            <option value="CARTAO_CATEGORIA">Gastos no cartao - Categorias</option>
-            <option value="GRAFICO_COMPARATIVO">Grafico previsto x realizado</option>
-            <option value="GRAFICO_CATEGORIA">Grafico por categoria</option>
-            <option value="GRAFICO_MENSAL">Grafico de saldo realizado</option>
+            <option value="CARTAO_CATEGORIA">Gastos no cartão - Categorias</option>
+            <option value="GRAFICO_COMPARATIVO">Gráfico previsto x realizado</option>
+            <option value="GRAFICO_CATEGORIA">Gráfico por categoria</option>
+            <option value="GRAFICO_MENSAL">Gráfico de saldo realizado</option>
           </select>
         </label>
 
         {showLancamentoDates && (
           <>
-            <label>Inicio<input type="date" value={filters.dataInicial} onChange={(e) => setFilter('dataInicial', e.target.value)} /></label>
+            <label>Início<input type="date" value={filters.dataInicial} onChange={(e) => setFilter('dataInicial', e.target.value)} /></label>
             <label>Fim<input type="date" value={filters.dataFinal} onChange={(e) => setFilter('dataFinal', e.target.value)} /></label>
           </>
         )}
 
         {filters.relatorio === 'GRAFICO_COMPARATIVO' && (
-          <label>Mes
+          <label>Mês
             <input type="month" value={filters.mes} onChange={(e) => setFilter('mes', e.target.value)} />
           </label>
         )}
@@ -256,7 +256,7 @@ export function Relatorios() {
             <select value={filters.status} onChange={(e) => setFilter('status', e.target.value)}>
               <option value="">Todos os status</option>
               <option value="PENDENTE">Pendentes</option>
-              <option value="CONCLUIDO">Concluidos</option>
+              <option value="CONCLUIDO">Concluídos</option>
               <option value="CANCELADO">Cancelados</option>
               <option value="VENCIDO">Vencidos</option>
             </select>
@@ -281,7 +281,7 @@ export function Relatorios() {
           </label>
         )}
 
-        {showDescricao && <input placeholder="Descricao" value={filters.descricao} onChange={(e) => setFilter('descricao', e.target.value)} />}
+        {showDescricao && <input placeholder="Descrição" value={filters.descricao} onChange={(e) => setFilter('descricao', e.target.value)} />}
 
         <div className="reportExecuteSlot">
           <button className="primary" onClick={execute} disabled={loading}><Play size={17} /> Executar</button>
@@ -291,7 +291,7 @@ export function Relatorios() {
       {error && <div className="formError">{error}</div>}
       {loading && <Loading />}
       {!loading && !report && !chartData && !error && (
-        <section className="emptyState">Configure os filtros e clique em Executar para gerar o relatorio.</section>
+        <section className="emptyState">Configure os filtros e clique em Executar para gerar o relatório.</section>
       )}
 
       {!loading && chartData && (
@@ -312,14 +312,14 @@ export function Relatorios() {
                 <Tooltip {...tooltipProps()} formatter={(value) => formatMoneyFromCentavos(value)} />
                 <Legend />
                 <Bar dataKey="entradas" name="Entradas" fill="#16a34a" />
-                <Bar dataKey="saidas" name="Saidas" fill="#dc2626" />
-                <Bar dataKey="saldo" name="Saldo" fill="#2563eb" />
+                <Bar dataKey="saidas" name="Saídas" fill="#dc2626" />
+                <Bar dataKey="saldo" name="Saldo" fill="#d4af37" />
               </BarChart>
             </ResponsiveContainer>
           )}
 
           {executed.relatorio === 'GRAFICO_CATEGORIA' && (
-            categoriaData.length === 0 ? <div className="emptyState compact">Sem dados no periodo.</div> : (
+            categoriaData.length === 0 ? <div className="emptyState compact">Sem dados no período.</div> : (
               <div className="chartWithLegend">
                 <ResponsiveContainer height={360}>
                   <PieChart>
@@ -343,7 +343,7 @@ export function Relatorios() {
           )}
 
           {executed.relatorio === 'GRAFICO_MENSAL' && (
-            mensalData.length === 0 ? <div className="emptyState compact">Sem dados no periodo.</div> : (
+            mensalData.length === 0 ? <div className="emptyState compact">Sem dados no período.</div> : (
               <ResponsiveContainer height={340}>
                 <LineChart data={mensalData}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -351,7 +351,7 @@ export function Relatorios() {
                   <YAxis tickFormatter={(value) => `R$ ${value / 100}`} tick={{ fill: 'var(--muted)' }} />
                   <Tooltip {...tooltipProps()} formatter={(value) => formatMoneyFromCentavos(value)} />
                   <Legend wrapperStyle={{ color: 'var(--text)' }} />
-                  <Line dataKey="saldoPrevisto" name="Saldo previsto" stroke="#2563eb" strokeWidth={3} />
+                  <Line dataKey="saldoPrevisto" name="Saldo previsto" stroke="#d4af37" strokeWidth={3} />
                   <Line dataKey="saldoRealizado" name="Saldo realizado" stroke="#16a34a" strokeWidth={3} />
                 </LineChart>
               </ResponsiveContainer>
@@ -365,7 +365,7 @@ export function Relatorios() {
           <div className="reportHeader">
             <div>
               <h2>{tituloRelatorio(executed.relatorio)}</h2>
-              <p>{reportDateText(executed)} - {totais.quantidade || 0} lancamentos</p>
+              <p>{reportDateText(executed)} - {totais.quantidade || 0} lançamentos</p>
             </div>
             {reportsWithExport.includes(executed.relatorio) && (
               <div className="reportActions">
@@ -392,7 +392,7 @@ export function Relatorios() {
                 <table className="reportTable cartaoCategoryTable">
                   <thead><tr><th>Categoria</th><th>Quantidade</th><th>Total</th></tr></thead>
                   <tbody>
-                    {items.length === 0 ? <tr><td colSpan="3">Nenhum gasto de cartao encontrado.</td></tr> : items.map((item) => (
+                    {items.length === 0 ? <tr><td colSpan="3">Nenhum gasto de cartão encontrado.</td></tr> : items.map((item) => (
                       <tr key={`${item.categoria}-${item.categoriaId || 'semcat'}`}>
                         <td data-label="Categoria" className="mobileTitle">{item.categoria || 'Sem categoria'}</td>
                         <td data-label="Quantidade">{item.quantidade}</td>
@@ -428,10 +428,10 @@ export function Relatorios() {
               <div className="reportTableWrap">
                 <table className="reportTable">
                   <thead>
-                    <tr><th>Tipo</th><th>Descricao</th><th>Categoria</th><th>Conta</th><th>Vencimento</th><th>Pagamento</th><th>Status</th><th>Valor</th></tr>
+                    <tr><th>Tipo</th><th>Descrição</th><th>Categoria</th><th>Conta</th><th>Vencimento</th><th>Pagamento</th><th>Status</th><th>Valor</th></tr>
                   </thead>
                   <tbody>
-                    {items.length === 0 ? <tr><td colSpan="8">Nenhum lancamento encontrado.</td></tr> : items.map((item) => (
+                    {items.length === 0 ? <tr><td colSpan="8">Nenhum lançamento encontrado.</td></tr> : items.map((item) => (
                       <tr key={item.id}>
                         <td>{item.tipo === 'PAGAR' ? 'Pagar' : 'Receber'}</td>
                         <td>{item.descricao}</td>

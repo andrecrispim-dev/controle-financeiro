@@ -70,7 +70,7 @@ export function Contas() {
   async function remove(item) {
     try {
       await api.delete(`/contas/${item.id}`);
-      setToast({ message: 'Conta excluida com sucesso.' });
+      setToast({ message: 'Conta excluída com sucesso.' });
       list.reload();
     } catch (err) {
       setToast({ type: 'error', message: err.message });
@@ -93,7 +93,7 @@ export function Contas() {
     <>
       <PageHeader
         title="Contas"
-        subtitle="Cadastre contas bancarias e acompanhe o saldo consolidado."
+        subtitle="Cadastre contas bancárias e acompanhe o saldo consolidado."
         action={<button className="primary" onClick={() => setModal(emptyConta)}><Plus size={18} /> Adicionar</button>}
       />
       <section className="summaryGrid report">
@@ -110,16 +110,16 @@ export function Contas() {
         <section className="panel tablePanel">
           {contas.length === 0 ? <div className="emptyState">Nenhuma conta cadastrada.</div> : (
             <table>
-              <thead><tr><th>Nome</th><th>Banco</th><th>Saldo inicial</th><th>Movimentacao concluida</th><th>Saldo atual</th><th>Status</th><th>Acoes</th></tr></thead>
+              <thead><tr><th>Nome</th><th>Banco</th><th>Saldo inicial</th><th>Movimentação concluída</th><th>Saldo atual</th><th>Status</th><th>Ações</th></tr></thead>
               <tbody>{contas.map((item) => (
                 <tr key={item.id}>
                   <td data-label="Nome" className="mobileTitle">{item.nome}</td>
                   <td data-label="Banco">{item.banco || '-'}</td>
                   <td data-label="Saldo inicial">{formatMoneyFromCentavos(item.saldoInicialCentavos)}</td>
-                  <td data-label="Movimentacao concluida" className={item.movimentacaoConcluidaCentavos >= 0 ? 'positiveText' : 'negativeText'}>{formatMoneyFromCentavos(item.movimentacaoConcluidaCentavos)}</td>
+                  <td data-label="Movimentação concluída" className={item.movimentacaoConcluidaCentavos >= 0 ? 'positiveText' : 'negativeText'}>{formatMoneyFromCentavos(item.movimentacaoConcluidaCentavos)}</td>
                   <td data-label="Saldo atual" className="moneyCell">{formatMoneyFromCentavos(item.saldoAtualCentavos)}</td>
                   <td data-label="Status"><span className={`badge ${item.ativa ? 'concluido' : 'cancelado'}`}>{item.ativa ? 'ATIVA' : 'INATIVA'}</span></td>
-                  <td data-label="Acoes" className="actions">
+                  <td data-label="Ações" className="actions">
                     <button className="iconButton" onClick={() => setModal({ ...item, bancoId: item.bancoId || '', saldoInicial: String(item.saldoInicialCentavos / 100) })} aria-label="Editar"><Edit size={17} /></button>
                     <button className="iconButton dangerIcon" onClick={() => setConfirm({ item })} aria-label="Excluir"><Trash2 size={17} /></button>
                   </td>
@@ -147,11 +147,11 @@ export function Contas() {
                 </button>
               </span>
             </label>
-            <label>Agencia<input name="agencia" defaultValue={modal.agencia || ''} maxLength={30} /></label>
-            <label>Numero<input name="numero" defaultValue={modal.numero || ''} maxLength={40} /></label>
+            <label>Agência<input name="agencia" defaultValue={modal.agencia || ''} maxLength={30} /></label>
+            <label>Número<input name="numero" defaultValue={modal.numero || ''} maxLength={40} /></label>
             <label>Saldo inicial<input name="saldoInicial" type="number" step="0.01" defaultValue={saldoInicialFormValue(modal)} /></label>
             <label className="checkboxLabel"><input name="ativa" type="checkbox" defaultChecked={modal.ativa !== false} /> Conta ativa</label>
-            <label className="full">Observacoes<textarea name="observacoes" defaultValue={modal.observacoes || ''} rows={3} maxLength={500} /></label>
+            <label className="full">Observações<textarea name="observacoes" defaultValue={modal.observacoes || ''} rows={3} maxLength={500} /></label>
             <div className="modalActions full"><button type="button" className="secondary" onClick={() => setModal(null)}>Cancelar</button><button className="primary">Salvar</button></div>
           </form>
         </Modal>
@@ -160,12 +160,12 @@ export function Contas() {
         <Modal title="Novo banco" onClose={() => setBankModal(null)}>
           <form className="formGrid single" onSubmit={saveBanco}>
             <label>Nome do banco<input name="nome" defaultValue={bankModal.nome} required maxLength={80} autoFocus /></label>
-            <label>Codigo<input name="codigo" defaultValue={bankModal.codigo} maxLength={10} placeholder="Ex.: 260" /></label>
+            <label>Código<input name="codigo" defaultValue={bankModal.codigo} maxLength={10} placeholder="Ex.: 260" /></label>
             <div className="modalActions full"><button type="button" className="secondary" onClick={() => setBankModal(null)}>Cancelar</button><button className="primary">Salvar banco</button></div>
           </form>
         </Modal>
       )}
-      {confirm && <ConfirmDialog danger title="Excluir conta" message={`Excluir "${confirm.item.nome}"? Contas vinculadas a lancamentos serao bloqueadas pela API.`} onClose={() => setConfirm(null)} onConfirm={() => remove(confirm.item)} confirmLabel="Excluir" />}
+      {confirm && <ConfirmDialog danger title="Excluir conta" message={`Excluir "${confirm.item.nome}"? Contas vinculadas a lançamentos serão bloqueadas pela API.`} onClose={() => setConfirm(null)} onConfirm={() => remove(confirm.item)} confirmLabel="Excluir" />}
       <Toast toast={toast} onClose={() => setToast(null)} />
     </>
   );

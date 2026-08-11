@@ -46,7 +46,7 @@ export function LancamentoForm({ lancamento, categorias, contas = [], onSubmit, 
     event.preventDefault();
     if (readOnly) return;
     setError('');
-    if (!form.descricao.trim()) return setError('Informe a descricao.');
+    if (!form.descricao.trim()) return setError('Informe a descrição.');
     if (!form.valor || Number(form.valor) <= 0) return setError('Informe um valor maior que zero.');
     if (!form.dataVencimento) return setError('Informe a data de vencimento.');
     setSaving(true);
@@ -78,7 +78,7 @@ export function LancamentoForm({ lancamento, categorias, contas = [], onSubmit, 
           <option value="RECEBER">Conta a receber</option>
         </select>
       </label>
-      <label>Descricao
+      <label>Descrição
         <input value={form.descricao} onChange={(e) => update('descricao', e.target.value)} maxLength={120} required readOnly={readOnly} />
       </label>
       <label>Categoria
@@ -87,7 +87,7 @@ export function LancamentoForm({ lancamento, categorias, contas = [], onSubmit, 
           {categoriasFiltradas.map((cat) => <option key={cat.id} value={cat.id}>{cat.nome}</option>)}
         </select>
       </label>
-      <label>Conta bancaria
+      <label>Conta bancária
         <select value={form.contaId} onChange={(e) => update('contaId', e.target.value)} disabled={readOnly}>
           <option value="">Sem conta vinculada</option>
           {contas.map((conta) => <option key={conta.id} value={conta.id}>{conta.nome}</option>)}
@@ -102,7 +102,7 @@ export function LancamentoForm({ lancamento, categorias, contas = [], onSubmit, 
       <label>Status
         <select value={form.status} onChange={(e) => update('status', e.target.value)} disabled={readOnly}>
           <option value="PENDENTE">Pendente</option>
-          <option value="CONCLUIDO">Concluido</option>
+          <option value="CONCLUIDO">Concluído</option>
           <option value="CANCELADO">Cancelado</option>
         </select>
       </label>
@@ -113,9 +113,9 @@ export function LancamentoForm({ lancamento, categorias, contas = [], onSubmit, 
       )}
       {!editing && (
         <>
-          <label>Recorrencia
+          <label>Recorrência
             <select value={form.recorrencia.frequencia} onChange={(e) => setForm((c) => ({ ...c, recorrencia: { ...c.recorrencia, frequencia: e.target.value } }))}>
-              <option value="NAO_REPETIR">Nao repetir</option>
+              <option value="NAO_REPETIR">Não repetir</option>
               <option value="SEMANAL">Semanal</option>
               <option value="QUINZENAL">Quinzenal</option>
               <option value="MENSAL">Mensal</option>
@@ -129,7 +129,7 @@ export function LancamentoForm({ lancamento, categorias, contas = [], onSubmit, 
           )}
         </>
       )}
-      <label className="full">Observacoes
+      <label className="full">Observações
         <textarea value={form.observacoes} onChange={(e) => update('observacoes', e.target.value)} maxLength={1000} rows={3} readOnly={readOnly} />
       </label>
       <div className="modalActions full">

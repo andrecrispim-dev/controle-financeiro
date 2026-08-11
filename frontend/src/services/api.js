@@ -19,7 +19,7 @@ async function request(path, options = {}) {
       ...options
     });
   } catch (error) {
-    throw new Error(`Nao foi possivel conectar ao backend em ${API_URL}. Verifique se o servidor da API esta iniciado.`);
+    throw new Error(`Não foi possível conectar ao backend em ${API_URL}. Verifique se o servidor da API está iniciado.`);
   }
   const isJson = response.headers.get('content-type')?.includes('application/json');
   const body = isJson ? await response.json() : await response.text();
@@ -27,7 +27,7 @@ async function request(path, options = {}) {
     const details = Array.isArray(body?.errors) && body.errors.length > 0
       ? ` ${body.errors.map((error) => `${error.field}: ${error.message}`).join(' | ')}`
       : '';
-    const message = `${body?.message || 'Nao foi possivel concluir a operacao.'}${details}`;
+    const message = `${body?.message || 'Não foi possível concluir a operação.'}${details}`;
     throw new Error(message);
   }
   return body;

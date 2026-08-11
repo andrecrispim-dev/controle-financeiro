@@ -58,10 +58,10 @@ function filterItems(items, search, filter, categoryFilter) {
 function groupItemsByCard(items) {
   const map = new Map();
   items.forEach((item) => {
-    const key = `${item.cartaoTitular || 'Cartao'}-${item.cartaoFinal || ''}`;
+    const key = `${item.cartaoTitular || 'Cartão'}-${item.cartaoFinal || ''}`;
     const current = map.get(key) || {
       key,
-      titular: item.cartaoTitular || 'Cartao',
+      titular: item.cartaoTitular || 'Cartão',
       cartao: item.cartaoFinal ? `Final ${item.cartaoFinal}` : '',
       totalCentavos: 0,
       itens: []
@@ -120,7 +120,7 @@ export function Faturas() {
         contaId: '',
         dataVencimento: parsed.vencimento || ''
       });
-      setToast({ message: `${parsed.quantidadeItens} lancamentos em ${parsed.grupos.length} grupo(s) importados.` });
+      setToast({ message: `${parsed.quantidadeItens} lançamentos em ${parsed.grupos.length} grupo(s) importados.` });
     } catch (err) {
       setFatura(null);
       setToast({ type: 'error', message: err.message });
@@ -201,7 +201,7 @@ export function Faturas() {
     try {
       await api.delete(`/faturas/${item.id}`);
       setConfirmDelete(null);
-      setToast({ message: 'Fatura excluida com sucesso.' });
+      setToast({ message: 'Fatura excluída com sucesso.' });
       faturasImportadas.reload();
     } catch (err) {
       setToast({ type: 'error', message: err.message });
@@ -276,10 +276,10 @@ export function Faturas() {
           </select>
           {[
             ['all', 'Todos'],
-            ['avista', 'A vista'],
+            ['avista', 'À vista'],
             ['parc', 'Parcelados'],
             ['semcat', 'Sem categoria'],
-            ['ambig', 'Ambiguos']
+            ['ambig', 'Ambíguos']
           ].map(([value, label]) => (
             <button key={value} className={`secondary ${viewerFilter === value ? 'active' : ''}`} onClick={() => setViewerFilter(value)}>{label}</button>
           ))}
@@ -306,7 +306,7 @@ export function Faturas() {
                             {categoriasPagar.map((categoria) => <option key={categoria.id} value={categoria.id}>{categoria.nome}</option>)}
                           </select>
                         </td>
-                        <td data-label="Tipo" className="invoiceItemTags">{item.tipo === 'PARCELADO' ? <span className="invoiceTag parc">parc {item.parcela || '-'}</span> : <span className="invoiceTag avista">a vista</span>}{item.ambiguo && <span className="invoiceTag warn">ambiguo</span>}</td>
+                        <td data-label="Tipo" className="invoiceItemTags">{item.tipo === 'PARCELADO' ? <span className="invoiceTag parc">parc {item.parcela || '-'}</span> : <span className="invoiceTag avista">à vista</span>}{item.ambiguo && <span className="invoiceTag warn">ambíguo</span>}</td>
                         <td data-label="Valor" className="negativeText invoiceItemValue">{formatMoneyFromCentavos(item.valorCentavos)}</td>
                       </tr>
                     ))}
@@ -341,25 +341,25 @@ export function Faturas() {
 
       {fatura && !loading && (
         <>
-          <div className="invoiceStatus ok">{fatura.quantidadeItens} lancamentos em {fatura.grupos.length} grupo(s) importados.</div>
+          <div className="invoiceStatus ok">{fatura.quantidadeItens} lançamentos em {fatura.grupos.length} grupo(s) importados.</div>
           <section className="invoiceKpis">
             <article><span>Total da fatura</span><strong className="pink">{formatMoneyFromCentavos(fatura.totalCentavos)}</strong><small>Venc. {formatDate(fatura.vencimento)}</small></article>
-            <article><span>A vista este mes</span><strong className="green">{formatMoneyFromCentavos(stats.avista)}</strong><small>{stats.avistaN} lancamentos do mes</small></article>
-            <article><span>Parcelas este mes</span><strong className="purple">{formatMoneyFromCentavos(stats.parcelas)}</strong><small>{stats.parcelasN} parcelas nesta fatura</small></article>
-            <article><span>Compromisso futuro</span><strong className="blue">{formatMoneyFromCentavos(fatura.compromissoFuturoCentavos)}</strong><small>parcelas em proximas faturas</small></article>
+            <article><span>À vista este mês</span><strong className="green">{formatMoneyFromCentavos(stats.avista)}</strong><small>{stats.avistaN} lançamentos do mês</small></article>
+            <article><span>Parcelas este mês</span><strong className="purple">{formatMoneyFromCentavos(stats.parcelas)}</strong><small>{stats.parcelasN} parcelas nesta fatura</small></article>
+            <article><span>Compromisso futuro</span><strong className="blue">{formatMoneyFromCentavos(fatura.compromissoFuturoCentavos)}</strong><small>parcelas em próximas faturas</small></article>
           </section>
 
           {fatura.validacao && !fatura.validacao.totalBate && (
             <div className="invoiceStatus warn">
               A soma dos itens ({formatMoneyFromCentavos(fatura.somaItensCentavos)}) diverge do total da fatura ({formatMoneyFromCentavos(fatura.totalCentavos)}).
-              Diferenca: {formatMoneyFromCentavos(fatura.validacao.diferencaCentavos)}.
+              Diferença: {formatMoneyFromCentavos(fatura.validacao.diferencaCentavos)}.
             </div>
           )}
 
           <section className="invoiceConfirm panel">
             <div className="formGrid">
-              <label>Descricao<input value={form.descricao} onChange={(e) => update('descricao', e.target.value)} maxLength={120} /></label>
-              <label>Conta bancaria
+              <label>Descrição<input value={form.descricao} onChange={(e) => update('descricao', e.target.value)} maxLength={120} /></label>
+              <label>Conta bancária
                 <select value={form.contaId} onChange={(e) => update('contaId', e.target.value)}>
                   <option value="">Selecione a conta</option>
                   {contasAtivas.map((conta) => <option key={conta.id} value={conta.id}>{conta.nome}</option>)}
@@ -381,8 +381,8 @@ export function Faturas() {
           <section className="panel invoicePreview">
             <div className="sectionHeader">
               <div>
-                <h2>Previa da fatura</h2>
-                <p>{previewItems.length} item(ns) lidos. Ajuste categorias essenciais e confirme a importacao.</p>
+                <h2>Prévia da fatura</h2>
+                <p>{previewItems.length} item(ns) lidos. Ajuste categorias essenciais e confirme a importação.</p>
               </div>
             </div>
             <div className="reportTableWrap">
@@ -404,7 +404,7 @@ export function Faturas() {
                             {categoriasPagar.map((categoria) => <option key={categoria.id} value={categoria.id}>{categoria.nome}</option>)}
                           </select>
                         </td>
-                        <td data-label="Tipo">{item.tipo === 'PARCELADO' ? 'Parcelado' : 'A vista'}</td>
+                        <td data-label="Tipo">{item.tipo === 'PARCELADO' ? 'Parcelado' : 'À vista'}</td>
                         <td data-label="Parcela">{item.parcela || '-'}</td>
                         <td data-label="Valor" className="negativeText invoiceItemValue">{formatMoneyFromCentavos(item.valorCentavos)}</td>
                       </tr>
@@ -419,7 +419,7 @@ export function Faturas() {
 
       {!fatura && !loading && (
         <section className="emptyState">
-          <FileUp size={22} /> Importe um PDF para visualizar a fatura antes de criar o lancamento.
+          <FileUp size={22} /> Importe um PDF para visualizar a fatura antes de criar o lançamento.
         </section>
       )}
 
@@ -437,12 +437,12 @@ export function Faturas() {
             <div className="reportTableWrap">
               <table className="reportTable invoiceHistoryTable">
                 <thead>
-                  <tr><th>Descricao</th><th>Banco</th><th>Conta</th><th>Vencimento</th><th>Status</th><th>Itens</th><th>Total</th><th>Acoes</th></tr>
+                  <tr><th>Descrição</th><th>Banco</th><th>Conta</th><th>Vencimento</th><th>Status</th><th>Itens</th><th>Total</th><th>Ações</th></tr>
                 </thead>
                 <tbody>
                   {importedItems.map((item) => (
                     <tr key={item.id}>
-                      <td data-label="Descricao" className="mobileTitle">{item.descricao}</td>
+                      <td data-label="Descrição" className="mobileTitle">{item.descricao}</td>
                       <td data-label="Banco">{item.banco}</td>
                       <td data-label="Conta">{item.contaNome || '-'}</td>
                       <td data-label="Vencimento">{formatDate(item.dataVencimento)}</td>
@@ -465,7 +465,7 @@ export function Faturas() {
       {confirmDelete && (
         <ConfirmDialog
           title="Excluir fatura"
-          message={`Excluir definitivamente "${confirmDelete.descricao}"? O lancamento a pagar vinculado tambem sera removido.`}
+          message={`Excluir definitivamente "${confirmDelete.descricao}"? O lançamento a pagar vinculado também será removido.`}
           confirmLabel="Excluir"
           danger
           onClose={() => setConfirmDelete(null)}

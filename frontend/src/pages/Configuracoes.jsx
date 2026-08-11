@@ -20,11 +20,11 @@ export function Configuracoes() {
 
   return (
     <>
-      <PageHeader title="Configuracoes" subtitle="Backup do banco e preferencias locais."
+      <PageHeader title="Configurações" subtitle="Backup do banco e preferências locais."
         action={<button className="primary" onClick={createBackup}><Plus size={18} /> Criar backup</button>} />
       <section className="panel settingsPanel">
         <div>
-          <h2>Aparencia</h2>
+          <h2>Aparência</h2>
           <p className="muted">Escolha o tema usado neste navegador.</p>
         </div>
         <button className="secondary" onClick={toggleTheme}>
@@ -47,8 +47,8 @@ export function Configuracoes() {
         )}
       </section>
       <section className="panel">
-        <h2>Restauracao de backup</h2>
-        <p className="muted">Pare o servidor, copie o arquivo `.sqlite` desejado para o caminho configurado em `DB_FILE` e reinicie a aplicacao. Em Docker, esse caminho fica dentro do volume persistente em `/app/data/financeiro.sqlite`.</p>
+        <h2>Restauração de backup</h2>
+        <p className="muted">Pare o servidor, copie o arquivo `.sqlite` desejado para o caminho configurado em `DB_FILE` e reinicie a aplicação. Em Docker, esse caminho fica dentro do volume persistente em `/app/data/financeiro.sqlite`.</p>
       </section>
       <Toast toast={toast} onClose={() => setToast(null)} />
     </>

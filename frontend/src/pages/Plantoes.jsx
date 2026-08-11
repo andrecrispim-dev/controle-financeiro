@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { CalendarPlus, Edit, Hospital, Moon, Plus, Save, SlidersHorizontal, Sparkles, Sun, Sunset, Trash2, WalletCards } from 'lucide-react';
+import { CalendarDays, CalendarPlus, Edit, Hospital, Moon, Plus, Save, SlidersHorizontal, Sparkles, Sun, Sunset, Trash2, WalletCards } from 'lucide-react';
 import { api } from '../services/api.js';
 import { useApi } from '../hooks/useApi.js';
 import { PageHeader } from '../components/PageHeader.jsx';
@@ -17,7 +17,7 @@ const tipos = [
   { value: 'NOTURNO', label: 'Noturno', icon: Moon },
   { value: 'ESPECIAL', label: 'Especial', icon: Sparkles }
 ];
-const weekDays = ['SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SAB', 'DOM'];
+const weekDays = ['SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB', 'DOM'];
 
 const emptyPlantao = (data) => ({
   data,
@@ -87,7 +87,7 @@ export function Plantoes() {
   }, [plantoes]);
 
   function needsConcluidoConfirmation(error) {
-    return error.message?.includes('ja esta concluido');
+    return error.message?.includes('ja esta concluido') || error.message?.includes('já está concluído');
   }
 
   async function runWithConcluidoConfirm(action, retry) {
@@ -96,8 +96,8 @@ export function Plantoes() {
     } catch (err) {
       if (needsConcluidoConfirmation(err)) {
         setConfirm({
-          title: 'Lancamento concluido',
-          message: 'O lancamento financeiro deste hospital/mes ja esta concluido. Deseja atualizar mesmo assim?',
+          title: 'Lançamento concluído',
+          message: 'O lançamento financeiro deste hospital/mês já está concluído. Deseja atualizar mesmo assim?',
           confirmLabel: 'Atualizar mesmo assim',
           onConfirm: async () => {
             try {
@@ -130,7 +130,7 @@ export function Plantoes() {
       if (plantaoModal.id) await api.put(`/plantoes/${plantaoModal.id}`, body);
       else await api.post('/plantoes', body);
       setPlantaoModal(null);
-      setToast({ message: 'Plantao salvo com sucesso.' });
+      setToast({ message: 'Plantão salvo com sucesso.' });
       plantoesApi.reload();
     };
     await runWithConcluidoConfirm(submit, submit);
@@ -140,13 +140,13 @@ export function Plantoes() {
     try {
       await api.deleteBody(`/plantoes/${item.id}`, { confirmarAtualizacaoConcluido });
       setConfirm(null);
-      setToast({ message: 'Plantao excluido com sucesso.' });
+      setToast({ message: 'Plantão excluído com sucesso.' });
       plantoesApi.reload();
     } catch (err) {
       if (needsConcluidoConfirmation(err)) {
         setConfirm({
-          title: 'Lancamento concluido',
-          message: 'O lancamento financeiro deste hospital/mes ja esta concluido. Deseja excluir o plantao e atualizar mesmo assim?',
+          title: 'Lançamento concluído',
+          message: 'O lançamento financeiro deste hospital/mês já está concluído. Deseja excluir o plantão e atualizar mesmo assim?',
           confirmLabel: 'Excluir e atualizar',
           danger: true,
           onConfirm: () => removePlantao(item, true)
@@ -171,7 +171,7 @@ export function Plantoes() {
     const submit = async (confirmarAtualizacaoConcluido) => {
       await api.post('/plantoes/lancar', { ...bodyBase, confirmarAtualizacaoConcluido });
       setLancarModal(null);
-      setToast({ message: 'Plantoes lancados no financeiro com sucesso.' });
+      setToast({ message: 'Plantões lançados no financeiro com sucesso.' });
       plantoesApi.reload();
     };
     await runWithConcluidoConfirm(submit, submit);
@@ -198,8 +198,8 @@ export function Plantoes() {
   return (
     <>
       <PageHeader
-        title="Plantoes"
-        subtitle="Cadastre os plantoes por hospital, acompanhe extras e lance o recebimento mensal."
+        title="Plantões"
+        subtitle="Cadastre os plantões por hospital, acompanhe extras e lance o recebimento mensal."
         action={(
           <div className="pageActions">
             <button className="secondary" onClick={() => setValoresOpen(true)}><SlidersHorizontal size={18} /> Configurar valores</button>
@@ -220,11 +220,11 @@ export function Plantoes() {
                   {item.totalExtrasCentavos > 0 && (
                     <span className="hospitalExtra">+ {formatMoneyFromCentavos(item.totalExtrasCentavos)} em extras</span>
                   )}
-                  <small>{item.quantidade} plantao(oes), {item.horas}h, {item.extras} extra(s)</small>
-                  {item.lancamento && <small className={`syncStatus ${item.lancamento.lancamentoStatus === 'CONCLUIDO' ? 'done' : 'pending'}`}>Lancamento {item.lancamento.lancamentoStatus.toLowerCase()}</small>}
+                  <small>{item.quantidade} plantão(ões), {item.horas}h, {item.extras} extra(s)</small>
+                  {item.lancamento && <small className={`syncStatus ${item.lancamento.lancamentoStatus === 'CONCLUIDO' ? 'done' : 'pending'}`}>Lançamento {item.lancamento.lancamentoStatus.toLowerCase()}</small>}
                 </div>
                 <button className="secondary" disabled={!item.quantidade} onClick={() => setLancarModal(item)}>
-                  <WalletCards size={17} /> Lancar plantoes
+                  <WalletCards size={17} /> Lançar plantões
                 </button>
               </article>
             ))}
@@ -250,22 +250,29 @@ export function Plantoes() {
                     onClick={() => setDayModal({ data })}
                   >
                     {data && <span className="dayNumber">{Number(data.slice(8, 10))}</span>}
-                    <span className="dayIcons">
-                      {items.map((plantao) => {
-                        const Info = tipoInfo(plantao.tipo);
-                        const Icon = Info.icon;
-                        return (
-                          <span
-                            key={plantao.id}
-                            title={`${plantao.hospital} - ${Info.label}${plantao.quantidadeExtras ? ` - ${plantao.quantidadeExtras} extra(s)` : ''}`}
-                            className={`plantaoIcon ${plantao.tipo.toLowerCase()} ${plantao.hospital.toLowerCase()}`}
-                          >
-                            <Icon size={15} />
-                            {plantao.quantidadeExtras > 0 && <span className="extraDot">+</span>}
-                          </span>
-                        );
-                      })}
-                    </span>
+                    {items.length > 0 ? (
+                      <span className="dayIcons">
+                        {items.map((plantao) => {
+                          const Info = tipoInfo(plantao.tipo);
+                          const Icon = Info.icon;
+                          return (
+                            <span
+                              key={plantao.id}
+                              title={`${plantao.hospital} - ${Info.label}${plantao.quantidadeExtras ? ` - ${plantao.quantidadeExtras} extra(s)` : ''}`}
+                              className={`plantaoIcon ${plantao.tipo.toLowerCase()} ${plantao.hospital.toLowerCase()}`}
+                            >
+                              <Icon size={15} />
+                              {plantao.quantidadeExtras > 0 && <span className="extraDot">+</span>}
+                            </span>
+                          );
+                        })}
+                      </span>
+                    ) : data && (
+                      <span className="agendaDayHint">
+                        <CalendarDays size={16} />
+                        Livre
+                      </span>
+                    )}
                     {items.length > 0 && (
                       <small>
                         {formatMoneyFromCentavos(items.reduce((sum, item) => sum + item.valorBaseCentavos, 0))}
@@ -286,9 +293,9 @@ export function Plantoes() {
       )}
 
       {dayModal && (
-        <Modal title={`Plantoes em ${formatDate(dayModal.data)}`} onClose={() => setDayModal(null)} wide>
+        <Modal title={`Plantões em ${formatDate(dayModal.data)}`} onClose={() => setDayModal(null)} wide>
           <div className="dayModalList">
-            {(byDate.get(dayModal.data) || []).length === 0 ? <div className="emptyState">Nenhum plantao neste dia.</div> : (byDate.get(dayModal.data) || []).map((item) => {
+            {(byDate.get(dayModal.data) || []).length === 0 ? <div className="emptyState">Nenhum plantão neste dia.</div> : (byDate.get(dayModal.data) || []).map((item) => {
               const Info = tipoInfo(item.tipo);
               const Icon = Info.icon;
               return (
@@ -301,7 +308,7 @@ export function Plantoes() {
                   <strong>{formatMoneyFromCentavos(item.valorTotalCentavos)}</strong>
                   <div className="actions">
                     <button className="iconButton" onClick={() => setPlantaoModal(item)} aria-label="Editar"><Edit size={17} /></button>
-                    <button className="iconButton dangerIcon" onClick={() => setConfirm({ title: 'Excluir plantao', message: `Excluir plantao ${Info.label} de ${item.hospital}?`, danger: true, confirmLabel: 'Excluir', onConfirm: () => removePlantao(item) })} aria-label="Excluir"><Trash2 size={17} /></button>
+                    <button className="iconButton dangerIcon" onClick={() => setConfirm({ title: 'Excluir plantão', message: `Excluir plantão ${Info.label} de ${item.hospital}?`, danger: true, confirmLabel: 'Excluir', onConfirm: () => removePlantao(item) })} aria-label="Excluir"><Trash2 size={17} /></button>
                   </div>
                 </article>
               );
@@ -314,7 +321,7 @@ export function Plantoes() {
       )}
 
       {plantaoModal && (
-        <Modal title={plantaoModal.id ? 'Editar plantao' : 'Novo plantao'} onClose={() => setPlantaoModal(null)}>
+        <Modal title={plantaoModal.id ? 'Editar plantão' : 'Novo plantão'} onClose={() => setPlantaoModal(null)}>
           <form className="formGrid" onSubmit={savePlantao}>
             <label>Data<input type="date" name="data" defaultValue={plantaoModal.data} required /></label>
             <label>Hospital
@@ -328,7 +335,7 @@ export function Plantoes() {
               </select>
             </label>
             <label>Pacientes extras<input type="number" name="quantidadeExtras" min="0" max="999" defaultValue={plantaoModal.quantidadeExtras || 0} /></label>
-            <label className="full">Observacoes<textarea name="observacoes" rows={3} maxLength={1000} defaultValue={plantaoModal.observacoes || ''} /></label>
+            <label className="full">Observações<textarea name="observacoes" rows={3} maxLength={1000} defaultValue={plantaoModal.observacoes || ''} /></label>
             <div className="modalActions full">
               <button type="button" className="secondary" onClick={() => setPlantaoModal(null)}>Cancelar</button>
               <button className="primary"><Save size={17} /> Salvar</button>
@@ -338,7 +345,7 @@ export function Plantoes() {
       )}
 
       {lancarModal && (
-        <Modal title={`Lancar plantoes ${lancarModal.hospital}`} onClose={() => setLancarModal(null)}>
+        <Modal title={`Lançar plantões ${lancarModal.hospital}`} onClose={() => setLancarModal(null)}>
           <form className="formGrid" onSubmit={lancar}>
             <label>Categoria
               <select name="categoriaId" required defaultValue="">
@@ -348,7 +355,7 @@ export function Plantoes() {
                 ))}
               </select>
             </label>
-            <label>Conta bancaria
+            <label>Conta bancária
               <select name="contaId" defaultValue="">
                 <option value="">Sem conta</option>
                 {contas.filter((conta) => conta.ativa).map((conta) => <option key={conta.id} value={conta.id}>{conta.nome}</option>)}
@@ -358,22 +365,22 @@ export function Plantoes() {
             <div className="launchPreview full">
               <span>Total a receber</span>
               <strong>{formatMoneyFromCentavos(lancarModal.totalCentavos)}</strong>
-              <small>{lancarModal.quantidade} plantao(oes), {lancarModal.horas}h e {lancarModal.extras} extra(s)</small>
+              <small>{lancarModal.quantidade} plantão(ões), {lancarModal.horas}h e {lancarModal.extras} extra(s)</small>
             </div>
             <div className="modalActions full">
               <button type="button" className="secondary" onClick={() => setLancarModal(null)}>Cancelar</button>
-              <button className="primary">Gerar/atualizar lancamento</button>
+              <button className="primary">Gerar/atualizar lançamento</button>
             </div>
           </form>
         </Modal>
       )}
 
       {valoresOpen && (
-        <Modal title="Configurar valores dos plantoes" onClose={() => setValoresOpen(false)} wide>
+        <Modal title="Configurar valores dos plantões" onClose={() => setValoresOpen(false)} wide>
           <div className="sectionHeader">
             <div>
               <h2>Valores cadastrados</h2>
-              <p className="muted">Ajuste os valores base e extras quando houver mudanca futura. Novos plantoes passam a usar a nova tabela.</p>
+              <p className="muted">Ajuste os valores base e extras quando houver mudança futura. Novos plantões passam a usar a nova tabela.</p>
             </div>
           </div>
           <div className="valueGrid">
@@ -389,7 +396,7 @@ export function Plantoes() {
       )}
 
       {valorModal && (
-        <Modal title="Editar valor de plantao" onClose={() => setValorModal(null)}>
+        <Modal title="Editar valor de plantão" onClose={() => setValorModal(null)}>
           <form className="formGrid single" onSubmit={saveValor}>
             <div className="launchPreview full">
               <span>{tipoInfo(valorModal.tipo).label}</span>

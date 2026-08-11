@@ -144,6 +144,45 @@ export function migrate(db = getDb()) {
       FOREIGN KEY (lancamento_id) REFERENCES lancamentos(id) ON UPDATE CASCADE ON DELETE CASCADE
     );
 
+    CREATE TABLE IF NOT EXISTS metas (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      nome TEXT NOT NULL,
+      valor_alvo_centavos INTEGER NOT NULL CHECK (valor_alvo_centavos > 0),
+      valor_atual_centavos INTEGER NOT NULL DEFAULT 0 CHECK (valor_atual_centavos >= 0),
+      data_alvo TEXT,
+      cor TEXT,
+      conta_id INTEGER,
+      status TEXT NOT NULL CHECK (status IN ('EM_ANDAMENTO', 'CONCLUIDA', 'CANCELADA')) DEFAULT 'EM_ANDAMENTO',
+      observacoes TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (conta_id) REFERENCES contas_bancarias(id) ON UPDATE CASCADE ON DELETE SET NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS meta_aportes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      meta_id INTEGER NOT NULL,
+      data TEXT NOT NULL,
+      valor_centavos INTEGER NOT NULL CHECK (valor_centavos > 0),
+      observacoes TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (meta_id) REFERENCES metas(id) ON UPDATE CASCADE ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS investimentos (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      ativo TEXT NOT NULL,
+      classe TEXT NOT NULL CHECK (classe IN ('RENDA_FIXA', 'RENDA_VARIAVEL', 'FUNDO', 'IMOVEL', 'EXTERIOR', 'OUTRO')),
+      instituicao TEXT,
+      valor_investido_centavos INTEGER NOT NULL CHECK (valor_investido_centavos >= 0),
+      valor_atual_centavos INTEGER NOT NULL CHECK (valor_atual_centavos >= 0),
+      data_aplicacao TEXT NOT NULL,
+      origem TEXT NOT NULL CHECK (origem IN ('MANUAL', 'IMPORTADO')) DEFAULT 'MANUAL',
+      observacoes TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
     CREATE TABLE IF NOT EXISTS plantoes (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       data TEXT NOT NULL,
@@ -177,6 +216,9 @@ export function migrate(db = getDb()) {
     CREATE INDEX IF NOT EXISTS idx_plantoes_data ON plantoes(data);
     CREATE INDEX IF NOT EXISTS idx_plantoes_hospital_mes ON plantoes(hospital, data);
     CREATE INDEX IF NOT EXISTS idx_plantao_lancamentos_mes ON plantao_lancamentos(ano_mes);
+    CREATE INDEX IF NOT EXISTS idx_metas_status ON metas(status);
+    CREATE INDEX IF NOT EXISTS idx_meta_aportes_meta ON meta_aportes(meta_id);
+    CREATE INDEX IF NOT EXISTS idx_investimentos_classe ON investimentos(classe);
   `);
 
   const contaColumns = db.prepare('PRAGMA table_info(contas_bancarias)').all().map((column) => column.name);

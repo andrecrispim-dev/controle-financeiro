@@ -53,14 +53,14 @@ export function Lancamentos() {
     if (modal?.item) await api.put(`/lancamentos/${modal.item.id}`, payload);
     else await api.post('/lancamentos', payload);
     setModal(null);
-    setToast({ message: 'Lancamento salvo com sucesso.' });
+    setToast({ message: 'Lançamento salvo com sucesso.' });
     list.reload();
   }
 
   async function remove(item) {
     await api.delete(`/lancamentos/${item.id}`);
     setConfirm(null);
-    setToast({ message: 'Lancamento excluido com sucesso.' });
+    setToast({ message: 'Lançamento excluído com sucesso.' });
     list.reload();
   }
 
@@ -75,14 +75,14 @@ export function Lancamentos() {
   async function reabrir(item) {
     await api.patch(`/lancamentos/${item.id}/reabrir`);
     setConfirm(null);
-    setToast({ message: 'Lancamento reaberto com sucesso.' });
+    setToast({ message: 'Lançamento reaberto com sucesso.' });
     list.reload();
   }
 
   async function cancelar(item) {
     await api.patch(`/lancamentos/${item.id}/cancelar`);
     setConfirm(null);
-    setToast({ message: 'Lancamento cancelado com sucesso.' });
+    setToast({ message: 'Lançamento cancelado com sucesso.' });
     list.reload();
   }
 
@@ -92,40 +92,40 @@ export function Lancamentos() {
 
   return (
     <>
-      <PageHeader title="Lancamentos" subtitle="Cadastre, filtre e acompanhe contas a pagar e receber."
+      <PageHeader title="Lançamentos" subtitle="Cadastre, filtre e acompanhe contas a pagar e receber."
         action={<button className="primary" onClick={() => setModal({ item: null })}><Plus size={18} /> Adicionar</button>} />
       <MonthNavigator value={filters.dataInicial} onChange={setMonth} />
       <section className="filters panel">
-        <input placeholder="Descricao" value={filters.descricao} onChange={(e) => setFilter('descricao', e.target.value)} />
+        <input placeholder="Descrição" value={filters.descricao} onChange={(e) => setFilter('descricao', e.target.value)} />
         <select value={filters.status} onChange={(e) => setFilter('status', e.target.value)}>
-          <option value="">Todos os status</option><option value="PENDENTE">Pendentes</option><option value="CONCLUIDO">Concluidos</option><option value="CANCELADO">Cancelados</option><option value="VENCIDO">Vencidos</option>
+          <option value="">Todos os status</option><option value="PENDENTE">Pendentes</option><option value="CONCLUIDO">Concluídos</option><option value="CANCELADO">Cancelados</option><option value="VENCIDO">Vencidos</option>
         </select>
         <input type="date" value={filters.dataInicial} onChange={(e) => setFilter('dataInicial', e.target.value)} />
         <input type="date" value={filters.dataFinal} onChange={(e) => setFilter('dataFinal', e.target.value)} />
       </section>
       {list.loading ? <Loading /> : (
         <section className="panel tablePanel">
-          {items.length === 0 ? <div className="emptyState">Nenhum lancamento encontrado.</div> : (
+          {items.length === 0 ? <div className="emptyState">Nenhum lançamento encontrado.</div> : (
             <table>
-              <thead><tr><th>Tipo</th><th>Descricao</th><th>Categoria</th><th>Conta</th><th>Valor</th><th>Vencimento</th><th>Status</th><th>Pagamento</th><th>Acoes</th></tr></thead>
+              <thead><tr><th>Tipo</th><th>Descrição</th><th>Categoria</th><th>Conta</th><th>Valor</th><th>Vencimento</th><th>Status</th><th>Pagamento</th><th>Ações</th></tr></thead>
               <tbody>
                 {items.map((item) => (
                   <tr key={item.id}>
                     <td data-label="Tipo"><span className={`typePill ${item.tipo.toLowerCase()}`}>{item.tipo === 'PAGAR' ? 'Pagar' : 'Receber'}</span></td>
-                    <td data-label="Descricao" className="mobileTitle">{item.descricao}</td>
+                    <td data-label="Descrição" className="mobileTitle">{item.descricao}</td>
                     <td data-label="Categoria">{item.categoria || '-'}</td>
                     <td data-label="Conta">{item.contaNome || '-'}</td>
                     <td data-label="Valor" className="moneyCell">{formatMoneyFromCentavos(item.valorCentavos)}</td>
                     <td data-label="Vencimento">{formatDate(item.dataVencimento)}</td>
                     <td data-label="Status"><StatusBadge item={item} /></td>
                     <td data-label="Pagamento">{formatDate(item.dataPagamento)}</td>
-                    <td data-label="Acoes" className="actions">
+                    <td data-label="Ações" className="actions">
                       <button className="iconButton" onClick={() => setModal({ item, mode: 'view' })} aria-label="Visualizar"><Eye size={17} /></button>
                       {item.status === 'CONCLUIDO'
-                        ? <button className="iconButton" onClick={() => setConfirm({ title: 'Reabrir lancamento', message: `Reabrir "${item.descricao}"?`, action: () => reabrir(item) })} aria-label="Reabrir"><RotateCcw size={17} /></button>
+                        ? <button className="iconButton" onClick={() => setConfirm({ title: 'Reabrir lançamento', message: `Reabrir "${item.descricao}"?`, action: () => reabrir(item) })} aria-label="Reabrir"><RotateCcw size={17} /></button>
                         : <button className="iconButton" onClick={() => concluir(item)} aria-label={item.tipo === 'PAGAR' ? 'Marcar como pago' : 'Marcar como recebido'}><CheckCircle2 size={17} /></button>}
-                      {item.status !== 'CANCELADO' && <button className="iconButton" onClick={() => setConfirm({ title: 'Cancelar lancamento', message: `Cancelar "${item.descricao}"?`, action: () => cancelar(item) })} aria-label="Cancelar"><XCircle size={17} /></button>}
-                      <button className="iconButton dangerIcon" onClick={() => setConfirm({ title: 'Excluir lancamento', message: `Excluir definitivamente "${item.descricao}"?`, action: () => remove(item), danger: true })} aria-label="Excluir"><Trash2 size={17} /></button>
+                      {item.status !== 'CANCELADO' && <button className="iconButton" onClick={() => setConfirm({ title: 'Cancelar lançamento', message: `Cancelar "${item.descricao}"?`, action: () => cancelar(item) })} aria-label="Cancelar"><XCircle size={17} /></button>}
+                      <button className="iconButton dangerIcon" onClick={() => setConfirm({ title: 'Excluir lançamento', message: `Excluir definitivamente "${item.descricao}"?`, action: () => remove(item), danger: true })} aria-label="Excluir"><Trash2 size={17} /></button>
                     </td>
                   </tr>
                 ))}
@@ -134,13 +134,13 @@ export function Lancamentos() {
           )}
           <div className="pagination">
             <button className="secondary" disabled={filters.pagina <= 1} onClick={() => setFilters((f) => ({ ...f, pagina: f.pagina - 1 }))}>Anterior</button>
-            <span>Pagina {meta.pagina} de {totalPages}</span>
-            <button className="secondary" disabled={filters.pagina >= totalPages} onClick={() => setFilters((f) => ({ ...f, pagina: f.pagina + 1 }))}>Proxima</button>
+            <span>Página {meta.pagina} de {totalPages}</span>
+            <button className="secondary" disabled={filters.pagina >= totalPages} onClick={() => setFilters((f) => ({ ...f, pagina: f.pagina + 1 }))}>Próxima</button>
           </div>
         </section>
       )}
       {modal?.item !== undefined && (
-        <Modal title={modal.item ? (modal.mode === 'view' ? 'Visualizar lancamento' : 'Editar lancamento') : 'Novo lancamento'} onClose={() => setModal(null)} wide>
+        <Modal title={modal.item ? (modal.mode === 'view' ? 'Visualizar lançamento' : 'Editar lançamento') : 'Novo lançamento'} onClose={() => setModal(null)} wide>
           <LancamentoForm
             lancamento={modal.item}
             categorias={categorias.data?.data || []}
